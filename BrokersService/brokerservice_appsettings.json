@@ -1,0 +1,27 @@
+{
+  "Discord": {
+    "Token": "",
+    "Guid": ""
+  },
+  "APIConnection": {
+    "Gateway": "http://api.gateway:80"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Empty",
+    //"BCIdentity": "",
+    "BCMaster": ""
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+
+  "JWT": {
+    "ValidIssuer": "",
+    "ValidAudience": "",
+    "SecretKey": ""
+  }
+}

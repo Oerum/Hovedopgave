@@ -1,0 +1,587 @@
+version: '3.4'
+
+#docker buildx create --name mybuilder1 --use
+#docker buildx bake --builder mybuilder1 --push
+
+services:
+  apigateway:
+    image: DockerUser/ms_apigateway:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: gateway.oerumtechnologies.com
+    restart: always
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - Serilog__Seq=${Serilog_Seq}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+    ports:
+      #- '80:80'
+      - '443:443' 
+    build:
+      context: .
+      dockerfile: apigateway/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  boundbot:
+    image: DockerUser/ms_boundbot:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: boundbotinfrastructure.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - RabbitMQ__User=${RabbitMQUser} 
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - HttpClient__connStr=${DiscordbotHttpClientconnStr}
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__IncorrectChannel__Bot=${Discord_IncorrectChannel_Bot}
+      - Store__Link__Sellix=${Store_Link_Sellix}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build: 
+      context: .
+      dockerfile: BoundBot/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  api.auth:
+    image: DockerUser/ms_apiauth:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: api.auth.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - RabbitMQ__User=${RabbitMQUser} 
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: API.Auth/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+      
+  api.discordbot:
+    image: DockerUser/ms_apidiscordbot:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: api.discordbot.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - RabbitMQ__User=${RabbitMQUser}
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid}
+      - MONGO__USER=${MONGODB_USER}
+      - MONGO__PASSWORD=${MONGODB_PASSWORD}
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: API.DiscordBot/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  api.admin:
+    image: DockerUser/ms_apiadmin:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: api.admin.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: API.Admin/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  api.sellix:
+    image: DockerUser/ms_apisellix:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: api.sellix.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - RabbitMQ__User=${RabbitMQUser}
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - MONGO__USER=${MONGODB_USER}
+      - MONGO__PASSWORD=${MONGODB_PASSWORD}
+      - SellixApi__ConnStr=${SellixApi_ConnStr} 
+      - SellixApi__Token=${SellixApi_Token} 
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: Api.Sellix/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  HostServices:
+    image: DockerUser/ms_hostservices:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: HostService/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  BrokersService:
+    image: DockerUser/ms_brokersservice:8.0.100-1-0.1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: brokersservice.oerumtechnologies.com
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - RabbitMQ__User=${RabbitMQUser}
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - MONGO__USER=${MONGODB_USER}
+      - MONGO__PASSWORD=${MONGODB_PASSWORD}
+      - Serilog__Seq=${Serilog_Seq}
+    restart: always
+    build:
+      context: .
+      dockerfile: BrokersService/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  api.gpt:
+    image: DockerUser/ms_gpt:8.0.100-1-0.1
+    platform: linux/amd64
+    hostname: api.gpt.oerumtechnologies.com
+    networks: 
+      - private_network
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - ConnectionStrings__DB__BC=${BCMaster} 
+      - JWT__ValidIssuer=${JWTValidUssuer}
+      - JWT__ValidAudience=${JWTValidAudience}
+      - JWT__SecretKey=${JWTSecretKey}
+      - RabbitMQ__User=${RabbitMQUser}
+      - RabbitMQ__Pass=${RabbitMQPass}
+      - MONGO__USER=${MONGODB_USER}
+      - MONGO__PASSWORD=${MONGODB_PASSWORD}
+      - SellixApi__ConnStr=${SellixApi_ConnStr} 
+      - SellixApi__Token=${SellixApi_Token} 
+      - Discord__Token=${DiscordToken}
+      - Discord__Guid=${DiscordGuid} 
+      - Discord__Role__Admin=${Discord_Role_Admin}
+      - Discord__Role__Staff=${Discord_Role_Staff}
+      - Discord__Role__Boost=${Discord_Role_Boost}
+      - Discord__Role__AIO=${Discord_Role_AIO}
+      - Discord__Role__Month=${Discord_Role_Month}
+      - Serilog__Seq=${Serilog_Seq}
+      - OpenAI__Key=${OpenAI_Key}
+    restart: always
+    build:
+      context: .
+      dockerfile: Api.GPT/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+
+  efcore:
+    image: DockerUser/ms_efcore:8.0.100-1-0.1
+    platform: linux/amd64
+    hostname: efcore.oerumtechnologies.com
+    networks: 
+      - private_network
+    environment:
+      - ConnectionStrings__DB__BC=${BCMaster} 
+    build:
+      context: .
+      dockerfile: EFCore/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+
+#####################################################################################
+############################  External Docker Services  #############################
+#####################################################################################
+
+  # certbot:
+  #   image: certbot/certbot
+  #   restart: unless-stopped
+
+  #   command: certonly --standalone -d boundbotinfrastructure.oerumtechnologies.com -d api.auth.oerumtechnologies.com -d api.discordbot.oerumtechnologies.com -d api.admin.oerumtechnologies.com -d api.sellix.oerumtechnologies.com -d ms_hostservices.oerumtechnologies.com -d ms_brokersservice.oerumtechnologies.com -d api.gpt.oerumtechnologies.com
+  #   volumes:
+  #     - /app/certs:/etc/letsencrypt
+  #   depends_on:
+  #     - apigateway
+  #     - boundbot
+  #     - api.auth
+  #     - api.discordbot 
+  #     - api.admin
+  #     - api.sellix
+  #     - HostServices
+  #     - BrokersService 
+  #     - api.gpt
+
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+#####################################################################################
+############################  Kafka Required Services   #############################
+#####################################################################################
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    platform: linux/amd64
+    networks: 
+      - private_network
+    restart: always
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    platform: linux/amd64
+    networks: 
+      - private_network
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT_EXTERNAL://kafka:19092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    platform: linux/amd64
+    networks: 
+      - private_network
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - schema-registry
+      - kafka-connect
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8085
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      DYNAMIC_CONFIG_ENABLED: 'true'  # not necessary, added for tests
+
+  postgresql:
+    image: postgres:latest
+    platform: linux/amd64
+    networks:
+      - private_network
+    restart: always
+    environment:
+      POSTGRES_DB: "conduktor-platform"
+      POSTGRES_USER: "conduktor"
+      POSTGRES_PASSWORD: "veryCIOSecretPass"
+    ports:
+      - '5430:5432'
+
+  conduktor-ui:
+    container_name: conduktor
+    image: conduktor/conduktor-platform:latest
+    depends_on:
+      - postgresql
+    platform: linux/amd64
+    networks:
+      - private_network
+    restart: always
+    environment:
+      CDK_LICENSE: ""
+      CDK_DATABASE_URL: "postgresql://conduktor:veryCIOSecretPass@postgresql:5432/conduktor-platform"
+    ports:
+      - '1080:8080'
+    volumes:
+      -  "persistedData_Conduktor:/var/conduktor"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    ports:
+      - "8085:8085"
+    platform: linux/amd64
+    networks: 
+      - private_network
+    restart: always
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8085
+      SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "http"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:latest
+    ports:
+      - "8083:8083"
+    platform: linux/amd64
+    networks: 
+      - private_network
+    restart: always
+    depends_on:
+      - kafka
+      - schema-registry
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect_configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect_offset
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: _connect_status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8085
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8085
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+  
+  rabbitMQ:
+    image:  masstransit/rabbitmq:latest
+    platform: linux/amd64
+    container_name: rabbitMQ
+    networks:
+      - private_network
+    hostname: rabbitMQ
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQDEFAULTUSER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQDEFAULTPASS}
+      - RabbitMQ__User=${RabbitMQUser}
+      - RabbitMQ__Pass=${RabbitMQPass} 
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - persistedData_RabbitMq:/var/lib/rabbitmq/
+      - persistedData_RabbitMq:/var/log/rabbitmq/
+      - persistedData_RabbitMq:/etc/rabbitmq/
+
+#####################################################################################
+###############################  Database Services  #################################
+#####################################################################################
+
+  mariaDB:
+    image: mariadb:latest
+    platform: linux/amd64
+    networks: 
+      - private_network
+    container_name: mariadb
+    restart: always
+    environment:
+      ACCEPT_EULA: Y
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: BC.Master
+    volumes:
+      - persistedData_MariaDb:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  #mongoDB:
+  #  image: bitnami/mongodb
+  #  platform: linux/amd64
+  #  restart: always
+  #  networks: 
+  #    - private_network
+  #  environment:
+  #    - MONGODB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+  #    - MONGODB_ROOT_USERNAME=${MONGODB_USER}
+  #  ports:
+  #    - "27017:27017"
+  #  volumes:
+  #    - persistedData_MongoDb:/data/db
+
+  seq:
+    image: datalust/seq:latest
+    platform: linux/amd64
+    restart: always
+    networks: 
+      - private_network
+    environment:
+      ACCEPT_EULA: Y
+    ports:
+      - "5341:5341"
+      - "5342:80"
+    volumes:
+      - persistedData_Seq:/data
+
+networks:
+  private_network:
+    driver: bridge
+
+volumes:
+  persistedData_Certs:
+  persistedData_MariaDb:
+  persistedData_MongoDb:
+  persistedData_RabbitMq:
+  persistedData_Seq:
+  persistedData_Conduktor:
+

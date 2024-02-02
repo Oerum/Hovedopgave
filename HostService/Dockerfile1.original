@@ -1,0 +1,29 @@
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM --platform=$TARGETARCH mcr.microsoft.com/dotnet/aspnet:8.0.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.100-1-bookworm-slim AS build
+WORKDIR /src
+COPY ["HostService/HostService.csproj", "HostService/"]
+COPY ["Auth.Database/Auth.Database.csproj", "Auth.Database/"]
+COPY ["Crosscutting/Crosscutting.csproj", "Crosscutting/"]
+COPY ["DiscordBot.Application/DiscordBot.Application.csproj", "DiscordBot.Application/"]
+COPY ["DiscordSaga.Components/DiscordSaga.Components.csproj", "DiscordSaga.Components/"]
+COPY ["DiscordBot.Infrastructure/DiscordBot.Infrastructure.csproj", "DiscordBot.Infrastructure/"]
+COPY ["BoundBot.Connection/BoundBot.Connection.csproj", "BoundBot.Connection/"]
+COPY ["LoggingService.Components/LoggingService.Components.csproj", "LoggingService.Components/"]
+RUN dotnet restore "HostService/HostService.csproj"
+COPY . .
+WORKDIR "/src/HostService"
+RUN dotnet build "HostService.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "HostService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "HostService.dll"]

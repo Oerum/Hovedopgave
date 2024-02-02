@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>766fb149-7e63-4bd0-a1e5-e3fa040b6d76</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.8.0" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.0" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Auth.Database\Auth.Database.csproj" />
+    <ProjectReference Include="..\Crosscutting\Crosscutting.csproj" />
+    <ProjectReference Include="..\Database.Infrastructure\Database.Infrastructure.csproj" />
+    <ProjectReference Include="..\DiscordBot.Application\DiscordBot.Application.csproj" />
+    <ProjectReference Include="..\DiscordBot.Infrastructure\DiscordBot.Infrastructure.csproj" />
+    <ProjectReference Include="..\LoggingService.Components\LoggingService.Components.csproj" />
+  </ItemGroup>
+</Project>

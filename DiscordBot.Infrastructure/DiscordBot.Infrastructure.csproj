@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="MySqlBackup.NET.MySqlConnector" Version="2.3.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Auth.Database\Auth.Database.csproj" />
+    <ProjectReference Include="..\BoundBot.Components\BoundBot.Components.csproj" />
+    <ProjectReference Include="..\BoundBot.Connection\BoundBot.Connection.csproj" />
+    <ProjectReference Include="..\Crosscutting\Crosscutting.csproj" />
+    <ProjectReference Include="..\Database.Application\Database.Application.csproj" />
+    <ProjectReference Include="..\DiscordBot.Application\DiscordBot.Application.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BoundBot.Application\BoundBot.Application.csproj" />
+    <ProjectReference Include="..\BoundBot.Components\BoundBot.Components.csproj" />
+    <ProjectReference Include="..\BoundBot.Connection\BoundBot.Connection.csproj" />
+    <ProjectReference Include="..\Gpt.Components\Gpt.Components.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="AdminCheckLicenses\" />
+    <Folder Include="CheckLicenses\" />
+    <Folder Include="DatabaseBackup\" />
+    <Folder Include="ExtendLicenses\" />
+    <Folder Include="GetCoupon\" />
+    <Folder Include="GrantLicense\" />
+    <Folder Include="Gpt\" />
+    <Folder Include="OnJoinedServerEvent\" />
+    <Folder Include="UpdateDiscord\" />
+    <Folder Include="UpdateHwid\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+  </ItemGroup>
+</Project>

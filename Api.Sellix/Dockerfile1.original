@@ -1,0 +1,28 @@
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM --platform=$TARGETARCH mcr.microsoft.com/dotnet/aspnet:8.0.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.100-1-bookworm-slim AS build
+WORKDIR /src
+COPY ["Api.Sellix/Api.Sellix.csproj", "Api.Sellix/"]
+COPY ["Auth.Database/Auth.Database.csproj", "Auth.Database/"]
+COPY ["Crosscutting/Crosscutting.csproj", "Crosscutting/"]
+COPY ["LoggingService.Components/LoggingService.Components.csproj", "LoggingService.Components/"]
+COPY ["Sellix.Application/Sellix.Application.csproj", "Sellix.Application/"]
+COPY ["Sellix.Components/Sellix.Components.csproj", "Sellix.Components/"]
+COPY ["Sellix.Infrastructure/Sellix.Infrastructure.csproj", "Sellix.Infrastructure/"]
+RUN dotnet restore "Api.Sellix/Api.Sellix.csproj"
+COPY . .
+WORKDIR "/src/Api.Sellix"
+RUN dotnet build "Api.Sellix.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Api.Sellix.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Api.Sellix.dll"]

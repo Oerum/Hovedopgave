@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="CheckLicenses\Implementation\" />
+    <Folder Include="CheckLicenses\Interface\" />
+    <Folder Include="DatabaseBackup\Interface\" />
+    <Folder Include="DatabaseBackup\Implementation\" />
+    <Folder Include="EmbedBuilder\Implementation\" />
+    <Folder Include="ExtendLicenses\Interface\" />
+    <Folder Include="ExtendLicenses\Implementation\" />
+    <Folder Include="GetCoupon\Interface\" />
+    <Folder Include="Gpt\Interface\" />
+    <Folder Include="Gpt\Implementation\" />
+    <Folder Include="GrantLicense\Implementation\" />
+    <Folder Include="GrantLicense\Interface\" />
+    <Folder Include="OnJoinedServerEvent\JoinMessage\Implementation\" />
+    <Folder Include="StaffLicense\Interface\" />
+    <Folder Include="StaffLicense\Implementation\" />
+    <Folder Include="UpdateDiscord\Implementation\" />
+    <Folder Include="UpdateHwid\Interface\" />
+    <Folder Include="UpdateHwid\Implementation\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.13.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BoundBot.Domain\BoundBot.Domain.csproj" />
+    <ProjectReference Include="..\Crosscutting\Crosscutting.csproj" />
+  </ItemGroup>
+</Project>

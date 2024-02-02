@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "apigateway": "StartDebugging",
+        "api.auth": "StartDebugging",
+        "api.discordbot": "StartDebugging",
+        "boundbot": "StartDebugging",
+        "BrokersService": "StartDebugging",
+        "dbcleanupservice": "StartDebugging",
+        "hostservice": "StartDebugging",
+        "api.sellix": "StartDebugging",
+        "webapplication1": "StartDebugging",
+        "loggingservice": "StartDebugging",
+        "gpt.api": "StartDebugging",
+        "efcore": "StartDebugging"
+      }
+    }
+  }
+}

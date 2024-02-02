@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>0db037e3-d50c-4e72-b6e7-27586da7b5fd</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Rystem.OpenAi" Version="3.3.11" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Auth.Database\Auth.Database.csproj" />
+    <ProjectReference Include="..\gpt.application\Gpt.application.csproj" />
+    <ProjectReference Include="..\Gpt.Components\Gpt.Components.csproj" />
+    <ProjectReference Include="..\Gpt.Infrastructure\Gpt.Infrastructure.csproj" />
+    <ProjectReference Include="..\LoggingService.Components\LoggingService.Components.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Gpt_Ft_Model\" />
+  </ItemGroup>
+</Project>
