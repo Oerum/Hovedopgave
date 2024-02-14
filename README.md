@@ -1,4 +1,4 @@
-This showcase project features the actual system deployed by Oerum Technologies. 
+This showcase project features one of the systems deployed by Oerum Technologies. 
 
 Please note that this project serves as a demonstration and is not actively maintained with updates. 
 
