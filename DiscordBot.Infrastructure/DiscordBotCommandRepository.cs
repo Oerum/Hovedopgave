@@ -1,5 +1,4 @@
-﻿using Auth.Database;
-using Auth.Database.Model;
+﻿using Auth.Database.Model;
 using Crosscutting;
 using Discord;
 using Discord.WebSocket;
@@ -13,6 +12,7 @@ using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using BoundBot.Components.Members;
 using Discord.Rest;
 using static BoundBot.Components.Members.DiscordServerMembersHandler;
+using Auth.Database.Contexts;
 
 namespace DiscordBot.Infrastructure
 {
@@ -39,9 +39,9 @@ namespace DiscordBot.Infrastructure
             {
                 _logger.LogInformation(model.DiscordUsername + " Engaged GetStaffLicense At: " + DateTime.UtcNow);
 
-                var check = await _db.ActiveLicenses.Include(user => user.User).Include(order => order.Order).Where(x => x.User.DiscordId == model.DiscordId || x.User.DiscordUsername == model.DiscordUsername).ToListAsync();
-                var userExists = await _db.User!.FirstOrDefaultAsync(x => x.DiscordId == model.DiscordId && x.DiscordUsername == model.DiscordUsername);
-
+                var check = await _db.ActiveLicenses.Include(user => user.User).Include(order => order.Order).Where(x => x.User.DiscordId == model.DiscordId && x.EndDate > DateTime.UtcNow).ToListAsync();
+                var userExists = await _db.User!.FirstOrDefaultAsync(x =>
+                                        x.DiscordId == model.DiscordId) ?? null;
                 if (check.Any())
                 {
                     foreach (var item in check)
@@ -133,7 +133,7 @@ namespace DiscordBot.Infrastructure
 
                 int activeLicensesCount = activeLicenses.Count(item => DateTime.UtcNow < item.EndDate);
 
-                bool userAlreadyHasRole = false;
+                int roleAddCount = 0;
 
                 switch (activeLicensesCount)
                 {
@@ -158,46 +158,24 @@ namespace DiscordBot.Infrastructure
 
                                 ulong.TryParse(_configuration["Discord:Role:AIO"], out ulong aioResult);
                                 ulong.TryParse(_configuration["Discord:Role:Month"], out ulong monthResult);
+                                ulong.TryParse(_configuration["Discord:Role:SoD"], out ulong sodResult);
 
-                                ulong roleId = (ulong)(item.ProductNameEnum == WhichSpec.AIO ? aioResult : monthResult);
+                                var roleId = item.ProductNameEnum switch
+                                {
+                                    WhichSpec.AIO => aioResult,
+                                    WhichSpec.Placeholder => sodResult,
+                                    _ => monthResult
+                                };
 
                                 try
                                 {
                                     var role = restGuild.GetRole(roleId);
 
-                                    if (role != null)
+                                    if (role != null && !model.Roles!.Contains(roleId.ToString()))
                                     {
-                                        if (roleId == aioResult)
-                                        {
-                                            if (!model.Roles!.Contains(roleId.ToString()))
-                                            {
-                                                await restGuildUser!.AddRoleAsync(role);
-                                                await restGuildUser.UpdateAsync();
-                                            }
-                                            else
-                                            {
-                                                userAlreadyHasRole = true;
-                                            }
-                                        }
-                                        else if (roleId == monthResult)
-                                        {
-                                            try
-                                            {
-                                                if (!model.Roles!.Contains(monthResult.ToString()))
-                                                {
-                                                    await restGuildUser!.AddRoleAsync(role);
-                                                    await restGuildUser.UpdateAsync();
-                                                }
-                                                else
-                                                {
-                                                    userAlreadyHasRole = true;
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                throw new Exception($"Unable to grant role @ Reason [@Admin]: {ex.Message}");
-                                            }
-                                        }
+                                        await restGuildUser!.AddRoleAsync(role);
+                                        await restGuildUser.UpdateAsync();
+                                        roleAddCount++;
                                     }
                                 }
                                 catch (Exception ex)
@@ -216,14 +194,11 @@ namespace DiscordBot.Infrastructure
                         break;
                 }
 
-                switch (userAlreadyHasRole)
+                return roleAddCount switch
                 {
-                    case true:
-                        return "You already have correct roles based on your active license(s)";
-
-                    case false:
-                        return "Successfully Updated Account & Roles";
-                }
+                    0 => "You already have correct roles based on your active license(s)",
+                    _ => "Successfully Updated Account & Roles",
+                };
             }
             catch (Exception ex)
             {

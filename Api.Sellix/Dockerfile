@@ -1,10 +1,10 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.5-bookworm-slim AS base
 USER app
 WORKDIR /app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.100-1-bookworm-slim AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0.300-bookworm-slim AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Api.Sellix/Api.Sellix.csproj", "Api.Sellix/"]
@@ -25,7 +25,7 @@ COPY ["DiscordSaga/DiscordSaga.csproj", "DiscordSaga/"]
 COPY ["LoggingService.Components/LoggingService.Components.csproj", "LoggingService.Components/"]
 COPY ["Sellix.Infrastructure/Sellix.Infrastructure.csproj", "Sellix.Infrastructure/"]
 COPY ["Sellix.Components/Sellix.Components.csproj", "Sellix.Components/"]
-RUN dotnet restore "./Api.Sellix/./Api.Sellix.csproj" 
+RUN dotnet restore "./Api.Sellix/Api.Sellix.csproj"
 COPY . .
 WORKDIR "/src/Api.Sellix"
 RUN dotnet build "./Api.Sellix.csproj" -c $BUILD_CONFIGURATION -o /app/build

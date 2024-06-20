@@ -8,6 +8,7 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddAuthDbContext(builder.Configuration);
 builder.Services.AddSagaDbContext(builder.Configuration);
+builder.Services.AddOAuthContext(builder.Configuration);
 
 var app = builder.Build();
 

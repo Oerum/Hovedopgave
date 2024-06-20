@@ -37,6 +37,7 @@ namespace Api.GPT.Controllers
             }
         }
 
+        [Authorize(Policy = PolicyConfiguration.UserPolicy)]
         [HttpPost("AI")]
         public async Task<IActionResult> Gpt([FromBody] GptModel question)
         {

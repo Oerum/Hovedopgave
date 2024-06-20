@@ -1,5 +1,4 @@
-﻿using Auth.Database;
-using Auth.Database.Model;
+﻿using Auth.Database.Model;
 using Confluent.Kafka;
 using Crosscutting.TransactionHandling;
 using Database.Application.Implementation;
@@ -24,6 +23,7 @@ using Serilog.AspNetCore;
 using StackExchange.Redis;
 using System.Reflection;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
+using Auth.Database.Contexts;
 
 namespace BrokersService.MassTransitServiceCollection;
 

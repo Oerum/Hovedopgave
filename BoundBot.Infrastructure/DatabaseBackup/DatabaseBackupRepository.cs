@@ -4,6 +4,7 @@ using BoundBot.Components.RestModel;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -16,13 +17,13 @@ public class DatabaseBackupRepository : IDatabaseBackupRepository
 {
     private readonly ILogger<DatabaseBackupRepository> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IDiscordConnectionHandler _discordConnectionHandler;
+    private readonly IDiscordConnectionHandler _connectionHandler;
 
     public DatabaseBackupRepository(ILogger<DatabaseBackupRepository> logger, IConfiguration configuration, IDiscordConnectionHandler discordConnectionHandler)
     {
         _logger = logger;
         _configuration = configuration;
-        _discordConnectionHandler = discordConnectionHandler;
+        _connectionHandler = discordConnectionHandler;
     }
 
 
@@ -30,6 +31,8 @@ public class DatabaseBackupRepository : IDatabaseBackupRepository
     {
         try
         {
+            await command.DeferAsync(false);
+
             DiscordModelDtoRestModel restModel = new(command);
             var embedBuilder = new Discord.EmbedBuilder
             {
@@ -38,13 +41,13 @@ public class DatabaseBackupRepository : IDatabaseBackupRepository
 
             if (restModel.Model.Roles!.Contains(_configuration["Discord:Role:Admin"]!) || restModel.Model.Roles.Contains(_configuration["Discord:Role:Staff"]!))
             {
-                HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/gateway/API/BC/Admin/JwtRefreshAndGenerate", restModel.Model);
+                HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/API/Core/Admin/JwtRefreshAndGenerate", restModel.Model);
                 var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
                 var jwtResponseBodyDeserialization = JsonConvert.DeserializeObject<DiscordBotJwtDto>(jwtResponseBody) ?? new DiscordBotJwtDto();
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtResponseBodyDeserialization.AccessToken);
 
-                HttpResponseMessage resp = await client.GetAsync($"/gateway/API/BC/Admin/DbDump");
+                HttpResponseMessage resp = await client.GetAsync($"/API/Core/Admin/DbDump");
                 var responseBody = await resp.Content.ReadAsStringAsync();
 
                 if (resp.IsSuccessStatusCode)
@@ -68,18 +71,22 @@ public class DatabaseBackupRepository : IDatabaseBackupRepository
 
             try
             {
-                await command.RespondAsync(embed: embedBuilder.Build());
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "";
+                    x.Embed = embedBuilder.Build();
+                });
             }
             catch (Exception ex)
             {
                 try
                 {
-                    DiscordSocketClient discordClient =
-                        _discordConnectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                    var discordClient =
+                           await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                    var clientUser = await discordClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
+                    var clientUser = await discordClient.socketClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
 
-                    var privateChannel = await discordClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
+                    var privateChannel = await discordClient.socketClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
                     var textNotifier = privateChannel as IMessageChannel;
                     await textNotifier!.SendMessageAsync($"{clientUser.Mention}\n*Discord API 3S Respond TD Expired\n[Reverting To Channel Message]*", false, embedBuilder.Build());
                 }

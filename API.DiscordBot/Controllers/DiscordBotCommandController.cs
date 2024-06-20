@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 using Crosscutting;
+using Crosscutting.Configuration.AuthPolicyConfiguration;
 using DiscordBot.Application.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +17,7 @@ namespace API.DiscordBot.Controllers
             _discord = discord;
         }
 
-        [Authorize(Policy = "admin")]
-        [Authorize(Policy = "staff")]
+        [Authorize(Policy = PolicyConfiguration.AdminOrStaff)]
         [HttpPost("StaffLicense")]
         public async Task<IActionResult> StaffLicense([FromBody] DiscordModelDto model)
         {
@@ -32,7 +32,7 @@ namespace API.DiscordBot.Controllers
             }
         }
 
-        [Authorize(Policy = "user")]
+        [Authorize(Policy = PolicyConfiguration.UserPolicy)]
         [HttpPut("UpdateDiscord")]
         public async Task<IActionResult> UpdateDiscordAndRole([FromBody] DiscordModelDto model)
         {
@@ -47,7 +47,7 @@ namespace API.DiscordBot.Controllers
             }
         }
 
-        [Authorize(Policy = "user")]
+        [Authorize(Policy = PolicyConfiguration.UserPolicy)]
         [HttpPut("UpdateHwid")]
         public async Task<IActionResult> UpdateHwid([FromBody] DiscordModelDto model)
         {

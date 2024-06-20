@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Text;
 using static BoundBot.Components.Members.DiscordServerMembersHandler;
 
 namespace DiscordBot.Infrastructure;
@@ -54,23 +55,36 @@ public class DiscordBotNotificationRepository : IDiscordBotNotificationRepositor
                     if (guildUser != null && restGuild != null)
                     {
                         if (ulong.TryParse(_configuration["Discord:Role:AIO"], out var aioResult) &&
-                            ulong.TryParse(_configuration["Discord:Role:Month"], out var monthResult))
+                            ulong.TryParse(_configuration["Discord:Role:Month"], out var monthResult) &&
+                            ulong.TryParse(_configuration["Discord:Role:SoD"], out var sodResult))
                         {
-                            var roleId = (context.WhichSpec == WhichSpec.AIO) ? aioResult : monthResult;
+                            var roleId = 0UL;
 
-                            var role = restGuild.GetRole(roleId);
-
-                            if (role != null)
+                            foreach (var spec in context.WhichSpec)
                             {
-                                await guildUser.AddRoleAsync(role);
-                                //guildUser = await client.restClient.GetGuildUserAsync(restGuild.Id, guildUser.Id);
-                                await guildUser.UpdateAsync();
+                                roleId = spec switch
+                                {
+                                    WhichSpec.AIO => aioResult,
+                                    WhichSpec.Placeholder => sodResult,
+                                    _ => monthResult
+                                };
+
+                                var role = restGuild.GetRole(roleId);
+
+                                if (role != null)
+                                {
+                                    if (!guildUser.RoleIds.Contains(roleId)) 
+                                    {
+                                        await guildUser.AddRoleAsync(role);
+                                        await guildUser.UpdateAsync();
+                                    }
+                                }
+                                else
+                                {
+                                    _logger.LogError("Role not found in the guild.");
+                                }
 
                                 couldGiveRoleFlag = guildUser.RoleIds.Contains(roleId);
-                            }
-                            else
-                            {
-                                _logger.LogError("Role not found in the guild.");
                             }
                         }
                         else
@@ -99,6 +113,25 @@ public class DiscordBotNotificationRepository : IDiscordBotNotificationRepositor
                 var readChannels = await GetMentionedChannels.GetMentionedForumChannelsMethod(socketGuild!, payedInfoChannelIds);
 
                 bool couldSendToUser = false;
+
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < deserializePayload.Data.Products.Count; i++)
+                {
+                    TimeSpan remainingTime = context.Time[i].AddSeconds(10) - DateTime.UtcNow;
+
+                    int remainingDays = remainingTime.Days;
+                    int remainingHours = remainingTime.Hours;
+                    int remainingMinutes = remainingTime.Minutes;
+                    int remainingSeconds = remainingTime.Seconds;
+                    string formattedRemainingTime = $"{remainingDays}d:{remainingHours}h:{remainingMinutes}m:{remainingSeconds}s";
+
+                    sb.AppendLine($"**Product({i+1}):** `{deserializePayload.Data.Products[i].Title}`");
+                    sb.AppendLine($"**Quantity:** `{context.Quantity[i]}`");
+                    sb.AppendLine($"**EndDate:** `{context.Time[i]} | ExpiresIn: {formattedRemainingTime}`");
+                    sb.AppendLine();
+                }
+
                 try
                 {
                     var embed = new EmbedBuilder()
@@ -110,15 +143,15 @@ public class DiscordBotNotificationRepository : IDiscordBotNotificationRepositor
                         .AddField("Roled", $"{couldGiveRoleFlag}" +
                             (couldGiveRoleFlag ? string.Empty : "\n@ ADMIN"), true)
                         .AddField("OrderId", $"{deserializePayload.Data.Uniqid}", true)
-                        .AddField("Product", $"{deserializePayload.Data.ProductTitle}", true)
-                        .AddField("EndDate", $"{context.Time}", true)
+
+                        .AddField("Product(s)", $"{(sb.Length > 0 ? sb.ToString() : "Fetch Error")}")
 
                         .AddField("Information Channels",
                             "Please read the following channels:" +
                             "\n" + readChannels)
 
                         .AddField("Rules",
-                            $"\n\nPlease refrain from using {socketGuild!.GetTextChannel(socketGuild.Channels.First(x => x.Name.ToLower().Contains("public-chat"))!.Id).Mention ?? socketGuild.GetTextChannel(860603152280584226).Mention}" +
+                            $"\n\nPlease refrain from using {socketGuild!.GetTextChannel(socketGuild.Channels.First(x => x.Name.ToLower().Contains("presale-chat"))!.Id).Mention ?? socketGuild.GetTextChannel(860603152280584226).Mention}" +
                             $"\nfor help or discussions!")
                         .WithColor(Color.DarkOrange)
                         .WithCurrentTimestamp()
@@ -133,31 +166,29 @@ public class DiscordBotNotificationRepository : IDiscordBotNotificationRepositor
                                            deserializePayload.Data.CustomFields.DiscordUser);
                 }
 
-
                 var privateEmbed = new EmbedBuilder()
                     .WithThumbnailUrl("https://i.imgur.com/dxCVy9r.png")
                     .WithTitle("Purchase Confirmation")
                     
-                    .AddField("User", $"{guildUser!.Mention}", true)
+                    .AddField("User", $"{guildUser?.Mention ?? "Not Found"}", true)
                     .AddField("Notified", $"{couldSendToUser}", true)
-                    .AddField("Roled", $"{couldGiveRoleFlag}" +
-                        (couldGiveRoleFlag ? string.Empty : "\n@ ADMIN"), true)
+                    .AddField("Roled", $"{couldGiveRoleFlag}" + (couldGiveRoleFlag ? string.Empty : "\n@ ADMIN"), true)
                     .AddField("OrderId", $"{deserializePayload.Data.Uniqid}", true)
-                    .AddField("Product", $"{deserializePayload.Data.ProductTitle}", true)
-                    .AddField("EndDate", $"{context.Time}", true)
+
+                    .AddField("Product(s)", $"{(sb.Length > 0 ? sb.ToString() : "Fetch Error")}")
 
                     .AddField("Information Channels",
                         "Please read the following channels:" +
                         "\n" + readChannels)
 
                     .AddField("Rules",
-                        $"\n\nPlease refrain from using {socketGuild!.GetTextChannel(socketGuild.Channels.First(x => x.Name.ToLower().Contains("public-chat"))!.Id).Mention ?? socketGuild.GetTextChannel(860603152280584226).Mention}" +
+                        $"\n\nPlease refrain from using {socketGuild!.GetTextChannel(socketGuild.Channels.First(x => x.Name.ToLower().Contains("presale-chat"))!.Id).Mention ?? socketGuild.GetTextChannel(860603152280584226).Mention}" +
                         $"\nfor help or discussions!")
                     .WithColor(Color.DarkOrange)
                     .WithCurrentTimestamp()
                 .Build();
 
-                var privateChannel = socketGuild!.GetChannel(socketGuild.Channels.First(x => x.Name.ToLower().Contains("notify"))!.Id) ?? socketGuild.GetChannel(862658521065848872); //NotifyChannel
+                var privateChannel = socketGuild!.GetChannel(socketGuild.Channels.First(x => x.Name.Contains("notify", StringComparison.CurrentCultureIgnoreCase))!.Id) ?? socketGuild.GetChannel(862658521065848872); //NotifyChannel
                 var textNotifier = privateChannel as IMessageChannel;
                 await textNotifier!.SendMessageAsync("", false, privateEmbed);
             }

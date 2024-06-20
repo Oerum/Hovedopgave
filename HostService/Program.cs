@@ -1,6 +1,7 @@
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.DbContextConfiguration;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
+using Crosscutting.TLS.Configuration;
 using Crosscutting.TransactionHandling;
 using Database.Application.Implementation;
 using Database.Application.Interface;
@@ -10,6 +11,7 @@ using DiscordBot.Infrastructure;
 using HostService.HostService;
 using LoggingService.Components.SerilogConfiguration;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Quartz;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -25,14 +27,19 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 builder.Services.AddAuthDbContext(builder.Configuration);
 
 //Dependency Injection
-builder.Services.Scan(a => a.FromCallingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
 //builder.Services.AddScoped<IUnitOfWork<IdentityDb>, UnitOfWork<IdentityDb>>();
-builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.AddScoped<IDiscordBotCleanupRepository, DiscordBotCleanupRepository>();
-builder.Services.AddScoped<IDiscordBotCleanupImplementation, DiscordBotCleanupImplementation>();
-builder.Services.AddScoped<IMariaDbBackupImplementation, MariaDbBackupImplementation>();
-builder.Services.AddScoped<IMariaDbBackupRepository, MariaDbBackupRepository>();
-builder.Services.AddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
+builder.Services.TryAddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
+builder.Services.TryAddScoped<IDiscordBotCleanupRepository, DiscordBotCleanupRepository>();
+builder.Services.TryAddScoped<IDiscordBotCleanupImplementation, DiscordBotCleanupImplementation>();
+builder.Services.TryAddScoped<IMariaDbBackupImplementation, MariaDbBackupImplementation>();
+builder.Services.TryAddScoped<IMariaDbBackupRepository, MariaDbBackupRepository>();
+builder.Services.TryAddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
 
 builder.Services.AddQuartz(q =>
 {
@@ -83,24 +90,7 @@ builder.Services.AddQuartzHostedService(opt =>
 });
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
-
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
 if (!builder.Environment.IsDevelopment())
 {

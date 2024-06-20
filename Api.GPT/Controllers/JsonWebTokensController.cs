@@ -11,10 +11,12 @@ namespace Api.GPT.Controllers
     public class JsonWebTokensController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<JsonWebTokensController> _logger;
 
-        public JsonWebTokensController(IConfiguration configuration)
+        public JsonWebTokensController(IConfiguration configuration, ILogger<JsonWebTokensController> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpPost("JwtRefreshAndGenerate")]
@@ -23,7 +25,7 @@ namespace Api.GPT.Controllers
         {
             try
             {
-                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, model);
+                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, _logger, model);
 
                 var jwt = await JwtApiResponse.JwtRefreshAndGenerate(claims, _configuration, model.RefreshToken, model.DiscordId);
 

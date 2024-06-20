@@ -5,6 +5,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="EmbedBuilder\**" />
+    <EmbeddedResource Remove="EmbedBuilder\**" />
+    <None Remove="EmbedBuilder\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\BoundBot.Application\BoundBot.Application.csproj" />
     <ProjectReference Include="..\BoundBot.Components\BoundBot.Components.csproj" />
     <ProjectReference Include="..\BoundBot.Connection\BoundBot.Connection.csproj" />
@@ -23,7 +28,7 @@
     <Folder Include="UpdateHwid\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.Rest" Version="3.15.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />

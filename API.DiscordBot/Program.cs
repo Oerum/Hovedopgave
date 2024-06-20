@@ -1,4 +1,3 @@
-using Auth.Database;
 using Auth.Database.DbContextConfiguration;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using BrokersService.MassTransitServiceCollection;
@@ -14,6 +13,9 @@ using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography.X509Certificates;
 using BoundBot.Components.Members;
 using System.Net;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Crosscutting.TLS.Configuration;
+using Auth.Database.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,15 +29,20 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 builder.Services.AddAuthDbContext(builder.Configuration);
 
 //Dependency Injection
-builder.Services.Scan(a => a.FromCallingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
 //builder.Services.AddScoped<IUnitOfWork<IdentityDb>, UnitOfWork<IdentityDb>>();
-builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.AddScoped<IDiscordBotQueryRepository, DiscordBotQueryRepository>();
-builder.Services.AddScoped<IDiscordBotQueryImplementation, DiscordBotQueryImplementation>();
-builder.Services.AddScoped<IDiscordBotCommandRepository, DiscordBotCommandRepository>();
-builder.Services.AddScoped<IDiscordBotCommandImplementation, DiscordBotCommandImplementation>();
-builder.Services.AddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
-builder.Services.AddScoped<IDiscordServerMembersHandler, DiscordServerMembersHandler>();
+builder.Services.TryAddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
+builder.Services.TryAddScoped<IDiscordBotQueryRepository, DiscordBotQueryRepository>();
+builder.Services.TryAddScoped<IDiscordBotQueryImplementation, DiscordBotQueryImplementation>();
+builder.Services.TryAddScoped<IDiscordBotCommandRepository, DiscordBotCommandRepository>();
+builder.Services.TryAddScoped<IDiscordBotCommandImplementation, DiscordBotCommandImplementation>();
+builder.Services.TryAddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
+builder.Services.TryAddScoped<IDiscordServerMembersHandler, DiscordServerMembersHandler>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -49,24 +56,7 @@ builder.Services.AddJwtConfiguration(builder.Configuration);
 builder.Services.AddClaimPolicyConfiguration();
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
-
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
 var app = builder.Build();
 

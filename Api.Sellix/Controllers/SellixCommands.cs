@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Nodes;
+using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sellix.Application.Interfaces;
@@ -15,7 +16,7 @@ namespace Api.Sellix.Controllers
             _couponCreateImplementation = couponCreateImplementation;
         }
 
-        [Authorize("booster")]
+        [Authorize(PolicyConfiguration.BoosterPolicy)]
         [HttpPost("CreateCoupon")]
         public async Task<IActionResult> Index([FromBody] JsonObject body)
         {

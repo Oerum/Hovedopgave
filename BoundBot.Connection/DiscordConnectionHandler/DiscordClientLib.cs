@@ -13,8 +13,7 @@ namespace BoundBot.Connection.DiscordConnectionHandler
     {
         public interface IDiscordConnectionHandler
         {
-            public DiscordSocketClient GetDiscordSocketClient(string token);
-            public Task<(DiscordSocketClient socketClient, DiscordRestClient restClient)> GetDiscordSocketRestClient(string token);
+            public Task<(DiscordSocketClient socketClient, DiscordRestClient restClient)> GetDiscordSocketRestClient(string token, bool init = false);
             public CommandService GetCommandService();
         }
 
@@ -27,40 +26,7 @@ namespace BoundBot.Connection.DiscordConnectionHandler
                 _logger = logger;
             }
 
-            DiscordSocketClient IDiscordConnectionHandler.GetDiscordSocketClient(string token)
-            {
-                DiscordSocketClient client = new(new DiscordSocketConfig
-                {
-                    AlwaysDownloadUsers = true,
-                    GatewayIntents = GatewayIntents.All,
-                });
-
-                if (client.ConnectionState != ConnectionState.Connected)
-                {
-
-                    client.SetGameAsync("You!", null, ActivityType.Watching).Wait();
-                    client.LoginAsync(TokenType.Bot, token).Wait();
-                    client.StartAsync().Wait();
-
-                    var stopwatch = Stopwatch.StartNew();
-                    var timeout = TimeSpan.FromSeconds(60);
-
-                    while (client.ConnectionState != ConnectionState.Connected)
-                    {
-                        if (stopwatch.Elapsed >= timeout)
-                        {
-                            _logger.LogInformation(1, "Failed to connect to Discord within the timeout period.");
-                            break;
-                        }
-
-                        Task.Delay(100).Wait();
-                    }
-                }
-
-                return client;
-            }
-
-            public async Task<(DiscordSocketClient socketClient, DiscordRestClient restClient)> GetDiscordSocketRestClient(string token)
+            public async Task<(DiscordSocketClient socketClient, DiscordRestClient restClient)> GetDiscordSocketRestClient(string token, bool init = false)
             {
                 try
                 {
@@ -73,29 +39,32 @@ namespace BoundBot.Connection.DiscordConnectionHandler
                     DiscordRestClient restClient = new DiscordRestClient(new DiscordRestConfig
                     {
                         LogLevel = LogSeverity.Info, // Set the desired log level
-                        DefaultRetryMode = RetryMode.AlwaysRetry // Set your retry mode preference
+                        DefaultRetryMode = RetryMode.AlwaysRetry, // Set your retry mode preference
                     });
 
-                    if (socketClient.ConnectionState != ConnectionState.Connected)
+                    if (socketClient.ConnectionState != ConnectionState.Connected || init)
                     {
 
                         await socketClient.SetGameAsync("You!", null, ActivityType.Watching);
                         await socketClient.LoginAsync(TokenType.Bot, token);
                         await socketClient.StartAsync();
 
-                        var stopwatch = Stopwatch.StartNew();
-                        var timeout = TimeSpan.FromSeconds(60);
-
-                        while (socketClient.ConnectionState != ConnectionState.Connected)
+                        if (!init)
                         {
-                            if (stopwatch.Elapsed >= timeout)
-                            {
-                                _logger.LogInformation(1,
-                                    "Failed to connect [Socket] to Discord within the timeout period.");
-                                break;
-                            }
+                            var stopwatch = Stopwatch.StartNew();
+                            var timeout = TimeSpan.FromSeconds(60);
 
-                            Task.Delay(100).Wait();
+                            while (socketClient.ConnectionState != ConnectionState.Connected)
+                            {
+                                if (stopwatch.Elapsed >= timeout)
+                                {
+                                    _logger.LogInformation(1,
+                                        "Failed to connect [Socket] to Discord within the timeout period.");
+                                    break;
+                                }
+
+                                await Task.Delay(100);
+                            }
                         }
                     }
 
@@ -103,19 +72,22 @@ namespace BoundBot.Connection.DiscordConnectionHandler
                     {
                         await restClient.LoginAsync(TokenType.Bot, token);
 
-                        var stopwatch = Stopwatch.StartNew();
-                        var timeout = TimeSpan.FromSeconds(60);
-
-                        while (restClient.LoginState != LoginState.LoggedIn)
+                        if (!init)
                         {
-                            if (stopwatch.Elapsed >= timeout)
-                            {
-                                _logger.LogInformation(1,
-                                    "Failed to connect [REST] to Discord within the timeout period.");
-                                break;
-                            }
+                            var stopwatch = Stopwatch.StartNew();
+                            var timeout = TimeSpan.FromSeconds(60);
 
-                            await Task.Delay(100);
+                            while (restClient.LoginState != LoginState.LoggedIn)
+                            {
+                                if (stopwatch.Elapsed >= timeout)
+                                {
+                                    _logger.LogInformation(1,
+                                        "Failed to connect [REST] to Discord within the timeout period.");
+                                    break;
+                                }
+
+                                await Task.Delay(100);
+                            }
                         }
                     }
 

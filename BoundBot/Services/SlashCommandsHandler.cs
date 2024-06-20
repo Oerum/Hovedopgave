@@ -5,7 +5,6 @@ using System.Text;
 using BoundBot.Application.AdminCheckLicenses.Interface;
 using BoundBot.Application.CheckLicenses.Interface;
 using BoundBot.Application.DatabaseBackup.Interface;
-using BoundBot.Application.EmbedBuilder.Interface;
 using BoundBot.Application.ExtendLicenses.Interface;
 using BoundBot.Application.GetCoupon.Interface;
 using BoundBot.Application.Gpt.Interface;
@@ -17,17 +16,19 @@ using BoundBot.Components.RestModel;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Microsoft.Extensions.Logging;
 using BoundBot.Application.AlterLicense.Interface;
+using BoundBot.Components.GetOptionValue;
+using Discord.Rest;
 
 namespace BoundBot.Services
 {
     internal class SlashCommandsHandler
     {
-        private DiscordSocketClient Client { get; }
+        private DiscordSocketClient SocketClient { get; }
+        private DiscordRestClient RestClient { get; }
         private IConfiguration Configuration { get; }
         private readonly HttpClient _httpClient;
         private readonly ILogger<SlashCommandsHandler> _logger;
         private readonly IDiscordConnectionHandler _discordConnectionHandler;
-        private readonly IEmbedBuilderImplementation _embedBuilderImplementation;
         private readonly IUpdateDiscordImplementation _updateDiscordImplementation;
         private readonly IUpdateHwidImplementation _updateHwidImplementation;
         private readonly ICheckLicenseImplementation _checkLicenseImplementation;
@@ -40,13 +41,12 @@ namespace BoundBot.Services
         private readonly IGptDiscordImplementation _gptDiscordImplementation;
         private readonly IAlterLicenseImplementation _alterLicenseImplementation;
 
-        public SlashCommandsHandler(DiscordSocketClient client, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<SlashCommandsHandler> logger, IDiscordConnectionHandler discordConnectionHandler, IEmbedBuilderImplementation embedBuilderImplementation, IUpdateDiscordImplementation updateDiscordImplementation, IUpdateHwidImplementation updateHwidImplementation, ICheckLicenseImplementation checkLicenseImplementation, IGetSellixCouponImplementation getSellixCouponImplementation, IAdminCheckLicensesImplementation adminCheckLicensesImplementation, IStaffLicenseImplementation staffLicenseImplementation, IExtendLicensesImplementation extendLicensesImplementation, IDatabaseBackupImplementation databaseBackupImplementation, IGrantLicenseImplementation grantLicenseImplementation, IGptDiscordImplementation gtDiscordImplementation, IAlterLicenseImplementation alterLicenseImplementation)
+        public SlashCommandsHandler(DiscordSocketClient client, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<SlashCommandsHandler> logger, IDiscordConnectionHandler discordConnectionHandler, IUpdateDiscordImplementation updateDiscordImplementation, IUpdateHwidImplementation updateHwidImplementation, ICheckLicenseImplementation checkLicenseImplementation, IGetSellixCouponImplementation getSellixCouponImplementation, IAdminCheckLicensesImplementation adminCheckLicensesImplementation, IStaffLicenseImplementation staffLicenseImplementation, IExtendLicensesImplementation extendLicensesImplementation, IDatabaseBackupImplementation databaseBackupImplementation, IGrantLicenseImplementation grantLicenseImplementation, IGptDiscordImplementation gtDiscordImplementation, IAlterLicenseImplementation alterLicenseImplementation, DiscordRestClient restClient)
         {
-            Client = client;
+            SocketClient = client;
             Configuration = configuration;
             _logger = logger;
             _discordConnectionHandler = discordConnectionHandler;
-            _embedBuilderImplementation = embedBuilderImplementation;
             _updateDiscordImplementation = updateDiscordImplementation;
             _updateHwidImplementation = updateHwidImplementation;
             _checkLicenseImplementation = checkLicenseImplementation;
@@ -59,70 +59,30 @@ namespace BoundBot.Services
             _gptDiscordImplementation = gtDiscordImplementation;
             _httpClient = httpClientFactory.CreateClient("httpClient");
             _alterLicenseImplementation = alterLicenseImplementation;
+            RestClient = restClient;
         }
 
         public async Task SlashCommandHandler(SocketSlashCommand command)
         {
-            // Let's add a switch statement for the command name so we can handle multiple commands in one event.
-            switch (command.Data.Name)
+            await (command.Data.Name.ToLower() switch
             {
-                case "help":
-                case null:
-                    await Help(command);
-                    break;
-
-                case "purchase":
-                    await Purchase(command);
-                    break;
-
-                case "updatediscord":
-                    await _updateDiscordImplementation.UpdateDiscord(command, _httpClient);
-                    break;
-
-                case "hwid":
-                    await _updateHwidImplementation.UpdateHwid(command, _httpClient);
-                    break;
-
-                case "checkme":
-                    await _checkLicenseImplementation.CheckLicense(command, _httpClient);
-                    break;
-
-                case "coupon":
-                    await _getSellixCouponImplementation.GetCoupon(command, _httpClient);
-                    break;
-
-                case "checkdb":
-                    await _adminCheckLicensesImplementation.CheckLicenses(command, _httpClient);
-                    break;
-
-                case "stafflicense":
-                    await _staffLicenseImplementation.StaffLicense(command, _httpClient);
-                    break;
-
-                case "extendlicense":
-                    await _extendLicensesImplementation.Extend(command, _httpClient);
-                    break;
-
-                case "dbbackup":
-                    await _databaseBackupImplementation.DbBackup(command, _httpClient);
-                    break;
-
-                case "grantlicense":
-                    await _grantLicenseImplementation.GrantLicense(command, _httpClient);
-                    break;
-
-                case "embedbuilder":
-                    await _embedBuilderImplementation.EmbedBuilder(command, _httpClient);
-                    break;
-
-                case "aimodelupdate":
-                    await _gptDiscordImplementation.UpdateFtModel(command, _httpClient);
-                    break;
-
-                case "alterlicense":
-                    await _alterLicenseImplementation.AlterLicense(command, _httpClient);
-                    break;
-            }
+                "help" => Help(command),
+                null => Help(command),
+                "purchase" => Purchase(command),
+                "updatediscord" => _updateDiscordImplementation.UpdateDiscord(command, _httpClient),
+                "hwid" => _updateHwidImplementation.UpdateHwid(command, _httpClient),
+                "checkme" => _checkLicenseImplementation.CheckLicense(command, _httpClient),
+                "coupon" => _getSellixCouponImplementation.GetCoupon(command, _httpClient),
+                "checkdb" => _adminCheckLicensesImplementation.CheckLicenses(command, _httpClient),
+                "stafflicense" => _staffLicenseImplementation.StaffLicense(command, _httpClient),
+                "extendlicense" => _extendLicensesImplementation.Extend(command, _httpClient),
+                "dbbackup" => _databaseBackupImplementation.DbBackup(command, _httpClient),
+                "grantlicense" => _grantLicenseImplementation.GrantLicense(command, _httpClient),
+                "aimodelupdate" => _gptDiscordImplementation.UpdateFtModel(command, _httpClient),
+                "alterlicense" => _alterLicenseImplementation.AlterLicense(command, _httpClient),
+                "reply" => Reply(command, SocketClient),
+                _ => Help(command),
+            });
         }
 
         private async Task Help(SocketSlashCommand command)
@@ -131,8 +91,13 @@ namespace BoundBot.Services
 
             sb.AppendLine("\n**Make sure you use a proper slash command, and not sending it as a text command.**\n");
 
-            foreach (var item in await Client.GetGlobalApplicationCommandsAsync())
+            List<string> ignore = ["checkdb", "stafflicense", "extendlicense", "dbbackup", "grantlicense", "embedbuilder", "aimodelupdate", "alterlicense", "reply"];
+
+            foreach (var item in await SocketClient.GetGlobalApplicationCommandsAsync())
             {
+                if (ignore.Contains(item.Name.ToLower()))
+                    continue;
+
                 sb.AppendLine($"`/{item.Name}`");
             }
 
@@ -142,7 +107,7 @@ namespace BoundBot.Services
 
             var embed = new EmbedBuilder()
                             .WithThumbnailUrl("https://i.imgur.com/dxCVy9r.png")
-                            .WithDescription($"Commands can only be executed in #{Client.GetChannelAsync(879325830021529630)}")
+                            .WithDescription($"Commands can only be executed in #{await SocketClient.GetChannelAsync(879325830021529630)}")
                             .AddField("Commands", sb.ToString())
                             .WithColor(Color.DarkOrange)
                             .WithCurrentTimestamp()
@@ -160,7 +125,7 @@ namespace BoundBot.Services
 
                 _logger.LogInformation($"[POST REST] Successfully executed for {command.CommandName}");
 
-                var useClient = Client.GetGuild(ulong.Parse(Configuration["Discord:Guid"]!));
+                var useClient = SocketClient.GetGuild(ulong.Parse(Configuration["Discord:Guid"]!));
 
                 var embedBuiler = new EmbedBuilder();
                 embedBuiler.ThumbnailUrl = "https://i.imgur.com/dxCVy9r.png";
@@ -168,12 +133,11 @@ namespace BoundBot.Services
                 embedBuiler.WithTitle("Purchase Information");
 
                 embedBuiler.AddField("Requirement", "`A# Core Sub`", true);
-                embedBuiler.AddField("Services", $"{useClient!.GetTextChannel(useClient.Channels.First(x => x.Name.ToLower().Contains("📢-available-services"))!.Id).Mention ?? useClient.GetTextChannel(860603152280584226).Mention}", true);
                 embedBuiler.AddField("Discord ID", $"`{restModel.Model.DiscordId}`", true);
                 embedBuiler.AddField("Discord Name", $"`{restModel.Model.DiscordUsername}`", true);
-                embedBuiler.AddField("HWID", "`Found In A# Console`", true);
+                //embedBuiler.AddField("HWID", "`Found In A# Console`", true);
                 embedBuiler.AddField("Server Booster", "`/coupon` for 10%", true);
-                embedBuiler.AddField("Language Support", "`English Client Only`", true);
+                embedBuiler.AddField("Language Support", "`All Languages Supported (Beta)`", true);
                 embedBuiler.AddField("Activation Time", "`Instant`", true);
                 embedBuiler.AddField("No Role After Purchase", "`/updatediscord`", true);
 
@@ -187,6 +151,66 @@ namespace BoundBot.Services
                 embedBuiler.WithColor(Color.DarkOrange);
                 embedBuiler.WithCurrentTimestamp();
                 await command.RespondAsync(embed: embedBuiler.Build());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
+
+        private async Task Reply(SocketSlashCommand command, DiscordSocketClient socketClient)
+        {
+            try
+            {
+                await command.DeferAsync(true);
+
+                var guild = await RestClient.GetGuildAsync(Convert.ToUInt64(command.GuildId));
+                var user = await guild.GetUserAsync(command.User.Id);
+
+                if (user != null)
+                {
+                    var role = user.RoleIds;
+
+                    if (role.Contains(ulong.Parse(Configuration["Discord:Role:Admin"]!)) || role.Contains(ulong.Parse(Configuration["Discord:Role:Staff"]!)))
+                    {
+                        var response = command.GetOptionValues<string>("response")!;
+
+                        var channel = command.Channel;
+
+                        await command.ModifyOriginalResponseAsync(x =>
+                        {
+                            x.Embed = new EmbedBuilder()
+                                .WithDescription("Reply Sent!")
+                                .WithColor(Color.DarkOrange)
+                                .WithCurrentTimestamp()
+                                .Build();
+                        });
+
+                        await channel.SendMessageAsync(response);
+                    }
+                    else
+                    {
+                        await command.ModifyOriginalResponseAsync(x =>
+                        {
+                            x.Embed = new EmbedBuilder()
+                                .WithDescription("You do not have the required role to use this command.")
+                                .WithColor(Color.DarkOrange)
+                                .WithCurrentTimestamp()
+                                .Build();
+                        });
+                    }
+                }
+                else
+                {
+                    await command.ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Embed = new EmbedBuilder()
+                            .WithDescription("User not found.")
+                            .WithColor(Color.DarkOrange)
+                            .WithCurrentTimestamp()
+                            .Build();
+                    });
+                }
             }
             catch (Exception ex)
             {

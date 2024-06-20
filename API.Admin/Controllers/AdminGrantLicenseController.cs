@@ -1,12 +1,13 @@
 ﻿using Admin.Application.Interface.ExtendLicense;
 using Admin.Application.Interface.GrantLicense;
 using Crosscutting;
+using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Admin.Controllers
 {
-    [Route("API/BC/Admin/")]
+    [Route("API/Core/Admin/")]
     public class AdminGrantLicenseController : Controller
     {
         private readonly IAdminGrantLicenseImplementation _alter;
@@ -18,8 +19,7 @@ namespace API.Admin.Controllers
         }
 
 
-        [Authorize(Policy = "admin")]
-        [Authorize(Policy = "staff")]
+        [Authorize(Policy = PolicyConfiguration.AdminOrStaff)]
         [HttpPost("GrantLicense")]
         public async Task<IActionResult> ExtendLicenses([FromBody] GrantLicenseDto model)
         {

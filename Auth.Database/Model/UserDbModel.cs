@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Auth.Database.Model
 {
     [Index(nameof(DiscordId), IsUnique = true)]
-    [Index(nameof(DiscordUsername), IsUnique = true)]
+    [Index(nameof(DiscordUsername), IsUnique = false)]
     public class UserDbModel
     {
         [Key]

@@ -1,4 +1,4 @@
-﻿using Auth.Database;
+﻿using Auth.Database.Contexts;
 using Crosscutting;
 using DiscordBot.Application.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace DiscordBot.Infrastructure
         {
             try
             {
-                _logger.LogInformation(username + " Engaged CheckDB At: " + DateTime.UtcNow);
+                _logger.LogInformation("Admin Engaged CheckDB At: " + DateTime.UtcNow);
 
                 var db = _db.ActiveLicenses.Include(User => User.User).Where(x => x.User.DiscordUsername == username || x.User.DiscordId == id).ToList();
 
@@ -55,7 +55,7 @@ namespace DiscordBot.Infrastructure
         {
             try
             {
-                _logger.LogInformation(username + " Engaged CheckDB At: " + DateTime.UtcNow);
+                _logger.LogInformation(username + " Engaged CheckMe At: " + DateTime.UtcNow);
 
                 var db = _db.ActiveLicenses.Include(User => User.User).Where(x => x.User.DiscordUsername == username || x.User.DiscordId == id).ToList();
 

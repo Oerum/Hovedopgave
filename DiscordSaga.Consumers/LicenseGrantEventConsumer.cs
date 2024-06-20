@@ -1,5 +1,4 @@
-﻿using Auth.Database;
-using Crosscutting.SellixPayload;
+﻿using Crosscutting.SellixPayload;
 using Crosscutting.TransactionHandling;
 using DiscordSaga.Components.Events;
 using MassTransit;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Data;
 using Sellix.Application.Interfaces;
+using Auth.Database.Contexts;
 
 namespace DiscordSaga.Consumers;
 

@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Contact-email" xml:space="preserve">
+    <value>E-mail: Sales@ProdioNordic.com</value>
+  </data>
+  <data name="Contact-phone" xml:space="preserve">
+    <value>Telefon: +45 TBD</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>Kontakt os</value>
+  </data>
+  <data name="ContactUsEmail" xml:space="preserve">
+    <value>Sales@ProdioNordic.com</value>
+  </data>
+  <data name="ContactUsPhone" xml:space="preserve">
+    <value>+4530303030</value>
+  </data>
+  <data name="Counseling" xml:space="preserve">
+    <value>Ekspertrådgivning</value>
+  </data>
+  <data name="Counseling-Services-Text" xml:space="preserve">
+    <value>Vi står til rådighed med vores omfattende ekspertise for at guide dig gennem kompleksiteten af softwareudvikling og teknologiimplementering. Vores mål er at hjælpe dig med at træffe velinformerede beslutninger, der ikke kun understøtter dine nuværende forretningsmål, men også positionerer dig strategisk for fremtidig succes.
+&lt;br&gt;
+&lt;br&gt;
+Vores dedikerede team af erfarne rådgivere forstår, at hvert virksomhedsmiljø er unikt, og vi tilpasser vores rådgivning for at imødekomme dine specifikke behov og udfordringer. Vi trækker på en bred vifte af teknologier og bedste praksis for at sikre, at dine strategier ikke kun er innovative, men også bæredygtige på lang sigt.
+&lt;br&gt;
+&lt;br&gt;
+Uanset om du står over for komplekse softwareudviklingsprojekter, overvejer en omfattende teknologisk transformation eller ønsker at optimere dine eksisterende systemer, er vores rådgivning designet til at være din pålidelige partner på vejen mod succes. Lad os sammen skabe en skræddersyet løsning, der ikke kun opfylder dine øjeblikkelige behov, men også fremmer din virksomheds evne til at tilpasse sig og trives i den stadigt skiftende teknologiske verden.</value>
+  </data>
+  <data name="Counseling-Services-Title" xml:space="preserve">
+    <value>Rådgivning</value>
+  </data>
+  <data name="Development" xml:space="preserve">
+    <value>Skræddersyede softwareløsninger</value>
+  </data>
+  <data name="Development-Services-Text" xml:space="preserve">
+    <value>I vores dedikerede udviklingssektion skaber vi unikke softwareløsninger skræddersyet til din virksomheds behov. Med et erfarent team af udviklere kombinerer vi teknisk dygtighed med kreativitet for at levere innovative applikationer, der præcist opfylder dine krav. Vi prioriterer gennemsigtighed i vores samarbejde, og vores tilgang tilpasser sig dynamisk til dine specifikke behov og mål. 
+&lt;br&gt;
+&lt;br&gt;
+Vores løsninger er ikke kun teknisk solide, men også designet til at give din virksomhed en konkurrencefordel. Vi integrerer de nyeste teknologitrends og bruger velafprøvede metoder for at sikre, at din software ikke kun er pålidelig, men også skalerbar og klar til fremtidig udvikling. Vi er dedikerede til at levere høj kvalitet og stræber efter at overgå forventningerne.
+&lt;br&gt;
+&lt;br&gt;
+Når du vælger os som din softwareudviklingspartner, får du ikke kun adgang til vores tekniske ekspertise, men også en partner, der er engageret i din succes. Vi tror på at opbygge langvarige relationer gennem enestående service og konkrete resultater. Lad os sammen skabe den perfekte softwareløsning, der løfter din virksomhed til nye højder af effektivitet og konkurrenceevne.</value>
+  </data>
+  <data name="Development-Services-Title" xml:space="preserve">
+    <value>Udvikling</value>
+  </data>
+  <data name="HomeHighlight" xml:space="preserve">
+    <value>Lad os gøre din vision til en realitet.</value>
+  </data>
+  <data name="HomeMessage" xml:space="preserve">
+    <value>Vi specialiserer os i at udvikle innovative, skalerbare og skræddersyede softwareløsninger til virksomheder i alle størrelser og på tværs af alle brancher. 
+&lt;br&gt;
+&lt;br&gt;
+
+
+Vores team af erfarne fagfolk er dedikeret til at levere enestående resultater, der overgår dine forventninger.
+
+
+&lt;br&gt;
+&lt;br&gt;
+Samarbejd med os, og udnyt din virksomheds fulde potentiale.</value>
+  </data>
+  <data name="Operation-Services-Text" xml:space="preserve">
+    <value>Vores erfarne team af driftsspecialister leverer omfattende driftssupporttjenester for at sikre, at din IT-infrastruktur forbliver stabil, sikker og effektiv. Vi går ud over reaktiv support ved proaktivt at overvåge og optimere din systemydelse. Ved regelmæssig vedligeholdelse og avanceret overvågning sikrer vi, at din IT-infrastruktur ikke kun opfylder aktuelle standarder, men også udnytter de nyeste teknologiske fremskridt.
+&lt;br&gt;
+&lt;br&gt;
+Vi frigør dig fra bekymringer om daglig drift, så du kan fokusere på at udvikle din forretningsstrategi. Ud over traditionel driftssupport tilbyder vi skræddersyede træningsprogrammer og ressourcer for at øge dine teams driftseffektivitet. Vores tjenester er ikke kun reaktive, men en strategisk investering i din virksomheds langsigtede succes. Lad os være din pålidelige partner og sikre, at din IT-infrastruktur ikke kun opfylder nuværende behov, men også er klar til at imødekomme fremtidige udfordringer og muligheder.</value>
+  </data>
+  <data name="Operation-Services-Title" xml:space="preserve">
+    <value>Drift</value>
+  </data>
+  <data name="OurServices" xml:space="preserve">
+    <value>Hos Prodio Nordic tilbyder vi et omfattende udvalg af tjenester, der er designet til at løfte din virksomhed til nye højder. Fra vores skræddersyede softwareløsninger, der opfylder dine specifikke behov, til vores omhyggelige daglige driftsstyring sikrer vi, at dine systemer kører problemfrit. Vores ekspertrådgivning giver uvurderlig indsigt til strategisk beslutningstagning, mens vores dedikerede supportteam forbliver engageret i din succes hvert skridt på vejen. Med en dokumenteret erfaring i at udnytte banebrydende teknologier og branchens bedste praksis garanterer vi en problemfri og effektiv softwareoplevelse, der giver din virksomhed mulighed for at trives i det konkurrenceprægede markedslandskab. Bliv partner med os i dag, og frigør din virksomheds fulde potentiale.</value>
+  </data>
+  <data name="OurServicesHeader" xml:space="preserve">
+    <value>Hvad kan vi tilbyde jer?</value>
+  </data>
+  <data name="Services" xml:space="preserve">
+    <value>Tjenester</value>
+  </data>
+  <data name="ServicesGridElementCloud" xml:space="preserve">
+    <value>Vi tilbyder en integreret cloud-ydelse, frigør din virksomhed fra infrastrukturadministrationens kompleksitet.</value>
+  </data>
+  <data name="ServicesGridElementCounseling" xml:space="preserve">
+    <value>Ekspert rådgivning til at navigere gennem alle it behov</value>
+  </data>
+  <data name="ServicesGridElementDevelopment" xml:space="preserve">
+    <value>Skræddersyede softwareløsninger med fokus på teknisk dygtighed, kreativitet og gennemsigtighed.</value>
+  </data>
+  <data name="ServicesGridElementHardware" xml:space="preserve">
+    <value>Overlad dine hardware-behov til os, vi sikrer, at udstyret forbliver holdbart og driftssikkert.</value>
+  </data>
+  <data name="ServicesGridElementOperation" xml:space="preserve">
+    <value>Tager hånd om din IT-drift, så du bekymringsfrit kan koncentrere dig om dine kernekompetencer</value>
+  </data>
+  <data name="ServicesGridElementSupport" xml:space="preserve">
+    <value>Sikrer opdatering, optimering og sikkerhed.</value>
+  </data>
+  <data name="ServicesSubstitute" xml:space="preserve">
+    <value>Lad os håndtere, så du kan slippe</value>
+  </data>
+  <data name="Support-Services-Text" xml:space="preserve">
+    <value>Vores erfarne team af softwareeksperter leverer omfattende softwaresupporttjenester for at holde din software opdateret, optimeret og sikker. Vi går ud over at løse problemer ved proaktivt at overvåge og identificere potentielle risici. Ved regelmæssig opdatering og vedligeholdelse sikrer vi, at din software forbliver i overensstemmelse med branchestandarder og udnytter de seneste teknologiske fremskridt.
+&lt;br&gt;
+&lt;br&gt;
+Vi frigør dig fra bekymringer om softwareadministration, så du kan fokusere på din kerneforretning. Ud over traditionel support tilbyder vi skræddersyede træningsprogrammer og ressourcer for at øge dit teams effektivitet. Vores tjenester er ikke blot reaktive, men en strategisk investering i din virksomheds langsigtede succes. Lad os være din pålidelige partner, der sikrer, at din softwareinfrastruktur ikke kun opfylder aktuelle behov, men også er rustet til fremtidige udfordringer og muligheder.</value>
+  </data>
+  <data name="Support-Services-Title" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="TrustedBy" xml:space="preserve">
+    <value>Samarbejdspartnere</value>
+  </data>
+  <data name="WelcomeProdioNordic" xml:space="preserve">
+    <value>Velkommen til Prodio Nordic</value>
+  </data>
+  <data name="whychoose-left-header" xml:space="preserve">
+    <value>Erfarne Eksperter</value>
+  </data>
+  <data name="whychoose-left-text" xml:space="preserve">
+    <value>Vores specialiserede team af erfarne eksperter inden for softwareudvikling og teknologiimplementering er dedikeret til at sikre succesen af dine projekter. Med års erfaring i bagagen bringer vi ikke kun teknisk dygtighed, men også en omfattende forståelse af forretningsmæssige udfordringer.
+
+Vi engagerer os i hver fase af dit projekt, fra konceptualisering til implementering og vedligeholdelse. Den brede vifte af færdigheder og perspektiver i vores team sikrer, at vi ikke kun opfylder dine tekniske krav, men også forstår dine forretningsmål. Vi er din pålidelige partner, der går ud over kodning og implementering for at sikre, at dine IT-initiativer ikke kun fungerer, men også skaber mærkbar værdi for din virksomhed.</value>
+  </data>
+  <data name="whychoose-middle-header" xml:space="preserve">
+    <value>Bæredygtig IT-Innovation</value>
+  </data>
+  <data name="whychoose-middle-text" xml:space="preserve">
+    <value>Vi tror på, at bæredygtighed og IT-innovation kan gå hånd i hånd. Som en visionær virksomhed er vi dedikerede til at integrere bæredygtige praksisser i vores IT-løsninger. Fra energieffektiv kodning til brug af miljøvenlige teknologier stræber vi efter at minimere vores påvirkning på miljøet. Vores bæredygtige tilgang går ud over teknologien – det handler om at skabe positive forandringer og efterlade en varig indvirkning på både virksomheder og planeten. Vælg os som din IT-partner og vær med til at forme en mere bæredygtig digital fremtid.</value>
+  </data>
+  <data name="whychoose-right-header" xml:space="preserve">
+    <value>Tilpassede Løsninger</value>
+  </data>
+  <data name="whychoose-right-text" xml:space="preserve">
+    <value>Vi forstår, at hver virksomhed er unik. Derfor tilpasser vi vores rådgivning og support for at imødekomme dine specifikke behov. Vores skræddersyede løsninger sikrer, at du ikke kun opfylder dine nuværende forretningsmål, men også er forberedt på fremtidige udfordringer.</value>
+  </data>
+  <data name="WhyChooseH1" xml:space="preserve">
+    <value>Hvorfor vælge Prodio Nordic?</value>
+  </data>
+  <data name="WhyChooseP" xml:space="preserve">
+    <value>Med en dokumenteret erfaring med at levere innovative og skalerbare softwareløsninger står vi som en pålidelig partner, der er forpligtet til at drive din forretningssucces. Vores dygtige teams færdigheder inden for moderne teknologier og omhyggelige opmærksomhed på detaljer sikrer udviklingen af skræddersyede, fremtidssikrede applikationer. Ved at samarbejde med os får virksomheder adgang til en problemfri og effektiv softwareoplevelse, der giver dem mulighed for at holde sig foran i nutidens konkurrenceprægede landskab.</value>
+  </data>
+  <data name="WhyChooseSubstitute" xml:space="preserve">
+    <value>At vælge Prodio Nordic betyder at vælge ekspertise.</value>
+  </data>
+</root>

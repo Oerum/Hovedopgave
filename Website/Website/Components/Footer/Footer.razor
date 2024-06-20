@@ -1,0 +1,67 @@
+﻿@rendermode RenderMode.InteractiveServer
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+@using Microsoft.AspNetCore.Components.Web
+@using System.Diagnostics
+@inject IJSRuntime JS
+
+@* @(await Html.RenderComponentAsync<Footer>(RenderMode.InteractiveServer, new { }))
+ *@
+
+    <div class="footer">
+        @if (cultures == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            @* <div class="countries">
+                <button title="English" @onclick="() => RequestCultureChange(English!)" type="button">
+                    <i class="flag flag-us" />
+                </button>
+
+                <button title="Danish" @onclick="() => RequestCultureChange(Dansk!)" type="button">
+                    <i class="flag flag-dk" />
+                </button>
+            </div> *@
+        }
+
+        <div class="copyright">
+            <p>&copy; @DateTime.UtcNow.Year Core. All rights reserved.</p>
+        </div>
+    </div>
+
+@code {
+    private Dictionary<string, string>? cultures;
+    private string? English;
+    private string? Dansk;
+
+    protected override void OnInitialized()
+    {
+        cultures = Configuration.GetSection("Cultures").Get<Dictionary<string, string>>();
+
+        if (cultures != null)
+        {
+            English = cultures.FirstOrDefault(x => x.Value == "English").Key;
+            Dansk = cultures.FirstOrDefault(x => x.Value == "Dansk").Key;
+        }
+    }
+
+
+    private void RequestCultureChange(string culture)
+    {
+        if (string.IsNullOrEmpty(culture))
+        {
+            return;
+        }
+
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        var query = $"?culture={Uri.EscapeDataString(culture)}&" +
+            $"redirectUri={Uri.EscapeDataString(uri.PathAndQuery)}";
+
+        NavigationManager.NavigateTo($"/culture/SetCulture{query}", forceLoad: true);
+    }
+}

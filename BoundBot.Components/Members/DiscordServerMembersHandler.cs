@@ -57,8 +57,8 @@ namespace BoundBot.Components.Members
                     if (MembersData.AllGuildMembers!.Count <= 0)
                     {
                         // Retrieve guild members outside of the lock
-                        allGuildMembers = (List<IGuildUser>)await guild.GetUsersAsync().FlattenAsync();
-
+                        var flatten = await guild.GetUsersAsync().FlattenAsync();
+                        allGuildMembers = flatten.ToList();
                         // Lock to ensure safe access to the list when updating
                         lock (MembersData.AllGuildMembers)
                         {

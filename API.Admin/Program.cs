@@ -7,17 +7,19 @@ using Admin.Application.Interface.GrantLicense;
 using Admin.Infrastructure.ExtendLicense;
 using Admin.Infrastructure.GrantLicense;
 using Admin.Infrastructure.IAlterLicense;
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.DbContextConfiguration;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Crosscutting.Configuration.JwtConfiguration;
+using Crosscutting.TLS.Configuration;
 using Crosscutting.TransactionHandling;
 using Database.Application.Implementation;
 using Database.Application.Interface;
 using Database.Infrastructure;
 using LoggingService.Components.SerilogConfiguration;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
@@ -33,17 +35,22 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 builder.Services.AddAuthDbContext(builder.Configuration);
 
 //Dependency Injection
-builder.Services.Scan(a => a.FromCallingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
-builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.AddScoped<IAdminExtendLicensesRepository, AdminExtendLicensesRepository>();
-builder.Services.AddScoped<IAdminExtendLicensesImplementation, AdminExtendLicensesImplementation>();
-builder.Services.AddScoped<IMariaDbBackupRepository, MariaDbBackupRepository>();
-builder.Services.AddScoped<IMariaDbBackupImplementation, MariaDbBackupImplementation>();
-builder.Services.AddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
-builder.Services.AddScoped<IAdminGrantLicenseImplementation, AdminGrantLicenseImplementation>();
-builder.Services.AddScoped<IAdminGrantLicenseRepository, AdminGrantLicenseRepository>();
-builder.Services.AddScoped<IAlterLicenseImplementation, AlterLicenseImplementation>();
-builder.Services.AddScoped<IAlterLicenseRepository, AlterLicenseRepository>();
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+builder.Services.TryAddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
+builder.Services.TryAddScoped<IAdminExtendLicensesRepository, AdminExtendLicensesRepository>();
+builder.Services.TryAddScoped<IAdminExtendLicensesImplementation, AdminExtendLicensesImplementation>();
+builder.Services.TryAddScoped<IMariaDbBackupRepository, MariaDbBackupRepository>();
+builder.Services.TryAddScoped<IMariaDbBackupImplementation, MariaDbBackupImplementation>();
+builder.Services.TryAddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
+builder.Services.TryAddScoped<IAdminGrantLicenseImplementation, AdminGrantLicenseImplementation>();
+builder.Services.TryAddScoped<IAdminGrantLicenseRepository, AdminGrantLicenseRepository>();
+builder.Services.TryAddScoped<IAlterLicenseImplementation, AlterLicenseImplementation>();
+builder.Services.TryAddScoped<IAlterLicenseRepository, AlterLicenseRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -57,24 +64,7 @@ builder.Services.AddJwtConfiguration(builder.Configuration);
 builder.Services.AddClaimPolicyConfiguration();
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
-
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
 var app = builder.Build();
 

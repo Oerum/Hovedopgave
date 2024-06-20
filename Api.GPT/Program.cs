@@ -1,13 +1,15 @@
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.DbContextConfiguration;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Crosscutting.Configuration.JwtConfiguration;
+using Crosscutting.TLS.Configuration;
 using Crosscutting.TransactionHandling;
 using gpt.application.Implementation;
 using gpt.application.Interface;
 using Gpt.Infrastructure;
 using LoggingService.Components.SerilogConfiguration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
@@ -23,12 +25,17 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 builder.Services.AddAuthDbContext(builder.Configuration);
 
 //Dependency Injection
-builder.Services.Scan(a => a.FromCallingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
 //builder.Services.AddScoped<IUnitOfWork<IdentityDb>, UnitOfWork<IdentityDb>>();
-builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.AddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
-builder.Services.AddScoped<IGptImplementation, GptImplementation>();
-builder.Services.AddScoped<IGptRepository, GptRepository>();
+builder.Services.TryAddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
+builder.Services.TryAddScoped<IDiscordConnectionHandler, DiscordConnectionHandler>();
+builder.Services.TryAddScoped<IGptImplementation, GptImplementation>();
+builder.Services.TryAddScoped<IGptRepository, GptRepository>();
 
 
 builder.Services.AddControllers();
@@ -50,24 +57,7 @@ builder.Services.AddOpenAi(settings =>
 });
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
-
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
 var app = builder.Build();
 

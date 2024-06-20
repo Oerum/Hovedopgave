@@ -1,11 +1,13 @@
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.DbContextConfiguration;
 using BrokersService.MassTransitServiceCollection;
 using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Crosscutting.Configuration.JwtConfiguration;
+using Crosscutting.TLS.Configuration;
 using Crosscutting.TransactionHandling;
 using LoggingService.Components.SerilogConfiguration;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sellix.Application.Implementation;
 using Sellix.Application.Interfaces;
 using Sellix.Components;
@@ -25,10 +27,15 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 builder.Services.AddAuthDbContext(builder.Configuration);
 
 //Dependency Injection
-builder.Services.Scan(a => a.FromExecutingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
-builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.AddScoped<ISellixCouponCreateRepository, SellixCouponCreateRepository>();
-builder.Services.AddScoped<ISellixCouponCreateImplementation, SellixCouponCreateImplementation>();
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+builder.Services.TryAddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
+builder.Services.TryAddScoped<ISellixCouponCreateRepository, SellixCouponCreateRepository>();
+builder.Services.TryAddScoped<ISellixCouponCreateImplementation, SellixCouponCreateImplementation>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -48,24 +55,8 @@ builder.Services.AddMassTransitWithRabbitMqAndKafka(builder.Configuration, true)
 builder.Services.SellixApi(builder.Configuration);
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

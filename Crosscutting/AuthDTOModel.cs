@@ -2,6 +2,8 @@
 {
     public class AuthModelDTO
     {
+        public bool Success { get; set; }
+        public WhichSpec AuthRequest { get; set; }
         public string? Email { get; set; }
         public string? Firstname { get; set; }
         public string? Lastname { get; set; }
@@ -14,6 +16,6 @@
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public DateTime EndDate { get; set; }
         public string? UserId { get; set; }
-        public WhichSpec ProductNameEnum { get; set; } //ProductNameEnum
+        public WhichSpec ProductNameEnum { get; set; }
     }
 }

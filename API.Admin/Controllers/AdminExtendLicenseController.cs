@@ -1,11 +1,12 @@
 ﻿using Admin.Application.Interface.ExtendLicense;
 using Crosscutting;
+using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Admin.Controllers
 {
-    [Route("API/BC/Admin/")]
+    [Route("API/Core/Admin/")]
     public class AdminExtendLicenseController : Controller
     {
         private readonly IAdminExtendLicensesImplementation _license;
@@ -14,8 +15,7 @@ namespace API.Admin.Controllers
             _license = license;
         }
 
-        [Authorize(Policy = "admin")]
-        [Authorize(Policy = "staff")]
+        [Authorize(Policy = PolicyConfiguration.AdminOrStaff)]
         [HttpPost("ExtendLicenses")]
         public async Task<IActionResult> ExtendLicenses([FromBody] ExtendLicenseDto model)
         {

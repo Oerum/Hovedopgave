@@ -13,6 +13,7 @@ namespace Crosscutting.TransactionHandling
         {
             _context = context;
         }
+
         async Task IUnitOfWork<T>.CreateTransaction(IsolationLevel isolationLevel)
         {
             try
@@ -29,8 +30,11 @@ namespace Crosscutting.TransactionHandling
         {
             try
             {
-                await _transaction.CommitAsync();
-                await _transaction.DisposeAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                    await _transaction.DisposeAsync();
+                }
             }
             catch (Exception exception)
             {
@@ -42,8 +46,11 @@ namespace Crosscutting.TransactionHandling
         {
             try
             {
-                await _transaction.RollbackAsync();
-                await _transaction.DisposeAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.RollbackAsync();
+                    await _transaction.DisposeAsync();
+                }
             }
             catch (Exception exception)
             {

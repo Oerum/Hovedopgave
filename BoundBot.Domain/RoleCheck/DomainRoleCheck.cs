@@ -70,10 +70,10 @@ public class DomainRoleCheck : IDomainRoleCheck
             }
             catch (Exception)
             {
-                DiscordSocketClient discordClient =
-                    _discordConnectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                var discordClient = await
+                    _discordConnectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                var privateChannel = await discordClient.GetChannelAsync(command.Channel.Id);
+                var privateChannel = await discordClient.socketClient.GetChannelAsync(command.Channel.Id);
                 var textNotifier = privateChannel as IMessageChannel;
                 await textNotifier!.SendMessageAsync(embed: embedBuilder.Build());
             }

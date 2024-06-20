@@ -9,7 +9,6 @@
     <Folder Include="CheckLicenses\Interface\" />
     <Folder Include="DatabaseBackup\Interface\" />
     <Folder Include="DatabaseBackup\Implementation\" />
-    <Folder Include="EmbedBuilder\Implementation\" />
     <Folder Include="ExtendLicenses\Interface\" />
     <Folder Include="ExtendLicenses\Implementation\" />
     <Folder Include="GetCoupon\Interface\" />
@@ -25,8 +24,8 @@
     <Folder Include="UpdateHwid\Implementation\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.Rest" Version="3.15.0" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.15.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
   </ItemGroup>

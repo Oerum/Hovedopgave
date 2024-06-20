@@ -21,9 +21,9 @@ public class LicenseGrantEvent : CorrelatedBy<Guid>
 public class LicenseNotificationEvent : CorrelatedBy<Guid>
 {
     public string? Payload { get; set; }
-    public int? Quantity { get; set; }
-    public DateTime Time { get; set; }
-    public WhichSpec? WhichSpec { get; set; }
+    public required List<int> Quantity { get; set; }
+    public required List<DateTime> Time { get; set; }
+    public required List<WhichSpec> WhichSpec { get; set; }
     public Guid CorrelationId { get; set; }
 }
 

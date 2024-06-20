@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BoundBot.Components.GetOptionValue;
+using Microsoft.AspNetCore.Connections;
 
 namespace BoundBot.Infrastructure.ExtendLicenses;
 
@@ -18,13 +19,13 @@ public class ExtendLicensesRepository : IExtendLicensesRepository
 {
     private readonly ILogger<ExtendLicensesRepository> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IDiscordConnectionHandler _discordConnectionHandler;
+    private readonly IDiscordConnectionHandler _ConnectionHandler;
 
     public ExtendLicensesRepository(ILogger<ExtendLicensesRepository> logger, IConfiguration configuration, IDiscordConnectionHandler discordConnectionHandler)
     {
         _logger = logger;
         _configuration = configuration;
-        _discordConnectionHandler = discordConnectionHandler;
+        _ConnectionHandler = discordConnectionHandler;
     }
 
 
@@ -32,6 +33,8 @@ public class ExtendLicensesRepository : IExtendLicensesRepository
     {
         try
         {
+            await command.DeferAsync(false);
+
             DiscordModelDtoRestModel restModel = new(command);
             var embedBuilder = new Discord.EmbedBuilder
             {
@@ -46,7 +49,7 @@ public class ExtendLicensesRepository : IExtendLicensesRepository
 
                     IUser? discordid = null; 
 
-                    if (command.Data.Options.ElementAtOrDefault(1)!.Name != null)
+                    if (command.Data.Options.ElementAtOrDefault(1)?.Name != null)
                     {
                         discordid = command.GetOptionValues<IUser>("user");
                     }
@@ -57,13 +60,13 @@ public class ExtendLicensesRepository : IExtendLicensesRepository
                         DiscordId = discordid?.Id.ToString(),
                     };
 
-                    HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/gateway/API/BC/Admin/JwtRefreshAndGenerate", restModel.Model);
+                    HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/API/Core/Admin/JwtRefreshAndGenerate", restModel.Model);
                     var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
                     var jwtResponseBodyDeserialization = JsonConvert.DeserializeObject<DiscordBotJwtDto>(jwtResponseBody) ?? new DiscordBotJwtDto();
 
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtResponseBodyDeserialization.AccessToken);
 
-                    HttpResponseMessage resp = await client.PostAsJsonAsync($"/gateway/API/BC/Admin/ExtendLicenses", postModel);
+                    HttpResponseMessage resp = await client.PostAsJsonAsync($"/API/Core/Admin/ExtendLicenses", postModel);
 
                     var responseBody = await resp.Content.ReadAsStringAsync();
                     if (resp.IsSuccessStatusCode)
@@ -88,18 +91,22 @@ public class ExtendLicensesRepository : IExtendLicensesRepository
 
             try
             {
-                await command.RespondAsync(embed: embedBuilder.Build());
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "";
+                    x.Embed = embedBuilder.Build();
+                });
             }
             catch (Exception ex)
             {
                 try
                 {
-                    DiscordSocketClient discordClient =
-                        _discordConnectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                    var discordClient =
+                           await _ConnectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                    var clientUser = await discordClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
+                    var clientUser = await discordClient.socketClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
 
-                    var privateChannel = await discordClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
+                    var privateChannel = await discordClient.socketClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
                     var textNotifier = privateChannel as IMessageChannel;
                     await textNotifier!.SendMessageAsync($"{clientUser.Mention}\n*Discord API 3S Respond TD Expired\n[Reverting To Channel Message]*", false, embedBuilder.Build());
                 }

@@ -15,7 +15,7 @@ namespace Sellix.Application.Implementation
             _topicProducer = topicProducer;
         }
 
-        async Task<bool> ISellixGatewayBuyHandlerImplementation.OrderHandler(JsonObject root)
+        async Task<bool> ISellixGatewayBuyHandlerImplementation.OrderSubmit(JsonObject root)
         {
             try
             {

@@ -5,6 +5,7 @@ using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Crosscutting;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -18,27 +19,29 @@ public class CheckLicenseRepository : ICheckLicenseRepository
 {
     private readonly ILogger<CheckLicenseRepository> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IDiscordConnectionHandler _discordConnectionHandler;
+    private readonly IDiscordConnectionHandler _connectionHandler;
     public CheckLicenseRepository(ILogger<CheckLicenseRepository> logger, IConfiguration configuration, IDiscordConnectionHandler discordConnectionHandler)
     {
         _logger = logger;
         _configuration = configuration;
-        _discordConnectionHandler = discordConnectionHandler;
+        _connectionHandler = discordConnectionHandler;
     }
 
     async Task ICheckLicenseRepository.CheckLicense(SocketSlashCommand command, HttpClient client)
     {
         try
         {
+            await command.DeferAsync(false);
+
             DiscordModelDtoRestModel restModel = new(command);
 
-            HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/gateway/API/DiscordBot/JwtRefreshAndGenerate", restModel.Model);
+            HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/API/DiscordBot/JwtRefreshAndGenerate", restModel.Model);
             var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
             var jwtResponseBodyDeserialization = JsonConvert.DeserializeObject<DiscordBotJwtDto>(jwtResponseBody) ?? new DiscordBotJwtDto();
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtResponseBodyDeserialization.AccessToken);
 
-            HttpResponseMessage resp = await client.GetAsync($"/gateway/API/DiscordBot/Query/CheckMe/{command.User.Username + " % 23" + command.User.Discriminator}/{command.User.Id}");
+            HttpResponseMessage resp = await client.GetAsync($"/API/DiscordBot/Query/CheckMe/{command.User.Username + " % 23" + command.User.Discriminator}/{command.User.Id}");
 
             var responseBody = await resp.Content.ReadAsStringAsync();
 
@@ -51,11 +54,21 @@ public class CheckLicenseRepository : ICheckLicenseRepository
 
                 foreach (var item in authModels!)
                 {
+                    TimeSpan remainingTime = item.EndDate - DateTime.UtcNow;
+
+                    int remainingDays = remainingTime.Days;
+                    int remainingHours = remainingTime.Hours;
+                    int remainingMinutes = remainingTime.Minutes;
+                    int remainingSeconds = remainingTime.Seconds;
+                    string formattedRemainingTime = $"{remainingDays}d:{remainingHours}h:{remainingMinutes}m:{remainingSeconds}s";
+
+
                     builder.AppendLine($"**DiscordUsername**: {item.DiscordUsername}");
                     builder.AppendLine($"**DiscordId**: {item.DiscordId}");
                     builder.AppendLine($"**Name**: {item.ProductName}");
                     builder.AppendLine($"**Hwid**: {item.HWID}");
-                    builder.AppendLine($"**EndDate**: {item.EndDate}");
+                    builder.AppendLine($"**EndDate:** {item.EndDate} | ExpiresIn: {formattedRemainingTime}");
+
                     builder.AppendLine("\n");
                 }
 
@@ -73,18 +86,22 @@ public class CheckLicenseRepository : ICheckLicenseRepository
 
             try
             {
-                await command.RespondAsync(embed: embedBuilder.Build());
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = null;
+                    x.Embed = embedBuilder.Build();
+                });
             }
             catch (Exception ex)
             {
                 try
                 {
-                    DiscordSocketClient discordClient =
-                        _discordConnectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                    var discordClient =
+                           await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                    var clientUser = await discordClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
+                    var clientUser = await discordClient.socketClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
 
-                    var privateChannel = await discordClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
+                    var privateChannel = await discordClient.socketClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
                     var textNotifier = privateChannel as IMessageChannel;
                     await textNotifier!.SendMessageAsync($"{clientUser.Mention}\n*Discord API 3S Respond TD Expired\n[Reverting To Channel Message]*", false, embedBuilder.Build());
                 }

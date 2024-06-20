@@ -1,5 +1,5 @@
 ﻿using Admin.Application.Interface.GrantLicense;
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.Model;
 using Crosscutting;
 using Crosscutting.SellixPayload;
@@ -91,8 +91,8 @@ public class AdminGrantLicenseRepository : IAdminGrantLicenseRepository
                         var user = new UserDbModel
                         {
                             Email = dto.DiscordUsername + "@grant-license.com",
-                            Firstname = dto.DiscordUsername ?? "CryptoBuyer",
-                            Lastname = dto.DiscordUsername ?? "CryptoBuyer",
+                            Firstname = dto.DiscordUsername ?? "Unknown",
+                            Lastname = dto.DiscordUsername ?? "Unknown_Sur",
                             DiscordUsername = dto.DiscordUsername ?? "GrantLicense",
                             DiscordId = dto.DiscordId ?? "GrantLicense",
                             HWID = dto.Hwid ?? "Missing"

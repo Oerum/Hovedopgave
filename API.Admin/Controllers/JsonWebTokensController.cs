@@ -3,19 +3,21 @@ using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Crosscutting.Configuration.JwtConfiguration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace API.Admin.Controllers
 {
 
-    [Route("API/BC/Admin")]
+    [Route("API/Core/Admin")]
     public class JsonWebTokensController : Controller
     {
-        private readonly IConfiguration _configuration;
 
-        public JsonWebTokensController(IConfiguration configuration)
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<JsonWebTokensController> _logger;
+
+        public JsonWebTokensController(IConfiguration configuration, ILogger<JsonWebTokensController> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpPost("JwtRefreshAndGenerate")]
@@ -24,7 +26,7 @@ namespace API.Admin.Controllers
         {
             try
             {
-                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, model);
+                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, _logger, model);
 
                 var jwt = await JwtApiResponse.JwtRefreshAndGenerate(claims, _configuration, model.RefreshToken, model.DiscordId);
 

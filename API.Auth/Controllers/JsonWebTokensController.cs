@@ -6,13 +6,16 @@ using System.Security.Claims;
 
 namespace API.Auth.Controllers
 {
-    [Route("API/BC/Auth")]
+    [Route("API/Core/Auth")]
     public class JsonWebTokensController : Controller
     {
         private readonly IConfiguration _configuration;
-        public JsonWebTokensController(IConfiguration configuration)
+        private readonly ILogger<JsonWebTokensController> _logger;
+
+        public JsonWebTokensController(IConfiguration configuration, ILogger<JsonWebTokensController> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public class JwtModel
@@ -27,7 +30,7 @@ namespace API.Auth.Controllers
         {
             try
             {
-                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, hwid:body.Hwid);
+                var claims = PolicyClaimAuth.ClaimsConfiguration(_configuration, _logger, hwid:body.Hwid);
 
                 var jwt = await JwtApiResponse.JwtRefreshAndGenerate(claims, _configuration, body.RefreshToken, null!);
 

@@ -37,7 +37,7 @@ public class AiModule : ModuleBase<SocketCommandContext>
     {
         try
         {
-            var client = _connectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+            var client = await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
             SocketGuild guild;
 
@@ -46,7 +46,7 @@ public class AiModule : ModuleBase<SocketCommandContext>
 
             do
             {
-                guild = client.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
+                guild = client.socketClient.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
 
                 if (stopwatch.Elapsed >= timeout)
                 {
@@ -74,7 +74,7 @@ public class AiModule : ModuleBase<SocketCommandContext>
                 };
 
 
-                HttpResponseMessage jwtResponseMessage = await _httpClient.PostAsJsonAsync($"/gateway/API/GPT/JwtRefreshAndGenerate", model);
+                HttpResponseMessage jwtResponseMessage = await _httpClient.PostAsJsonAsync($"/API/GPT/JwtRefreshAndGenerate", model);
                 var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
                 var jwtResponseBodyDeserialization = JsonConvert.DeserializeObject<DiscordBotJwtDto>(jwtResponseBody) ?? new DiscordBotJwtDto();
 
@@ -85,7 +85,7 @@ public class AiModule : ModuleBase<SocketCommandContext>
                     Question = question
                 };
 
-                HttpResponseMessage resp = await _httpClient.PostAsJsonAsync("/gateway/API/GPT/AI", gpt);
+                HttpResponseMessage resp = await _httpClient.PostAsJsonAsync("/API/GPT/AI", gpt);
                 var responseBody = await resp.Content.ReadAsStringAsync();
 
                 var embedBuilder = new Discord.EmbedBuilder();

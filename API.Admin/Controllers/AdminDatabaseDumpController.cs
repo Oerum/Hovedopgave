@@ -1,10 +1,11 @@
-﻿using Database.Application.Interface;
+﻿using Crosscutting.Configuration.AuthPolicyConfiguration;
+using Database.Application.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Admin.Controllers
 {
-    [Route("API/BC/Admin/")]
+    [Route("API/Core/Admin/")]
     public class AdminDatabaseDumpController : Controller
     {
         private readonly IMariaDbBackupImplementation _backup;
@@ -14,7 +15,7 @@ namespace API.Admin.Controllers
             _backup = backup;
         }
 
-        [Authorize(Policy = "admin")]
+        [Authorize(Policy = PolicyConfiguration.AdminPolicy)]
         [HttpGet("DbDump")]
         public async Task<IActionResult> DatabaseDump()
         {

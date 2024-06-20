@@ -15,7 +15,8 @@
         "webapplication1": "StartDebugging",
         "loggingservice": "StartDebugging",
         "gpt.api": "StartDebugging",
-        "efcore": "StartDebugging"
+        "efcore": "StartDebugging",
+        "website": "StartDebugging"
       }
     }
   }

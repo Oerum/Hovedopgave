@@ -8,84 +8,98 @@ public class SellixCouponObject
     public class Coupon
     {
         [JsonProperty("id")]
-        public int? Id;
+        public int? id { get; set; }
 
         [JsonProperty("uniqid")]
-        public string? Uniqid;
+        public string? uniqid { get; set; }
 
         [JsonProperty("shop_id")]
-        public int? ShopId;
+        public int? shop_id { get; set; }
 
         [JsonProperty("type")]
-        public string? Type;
+        public string? type { get; set; }
+
+        [JsonProperty("coupon_type")]
+        public string? coupon_type { get; set; }
 
         [JsonProperty("code")]
-        public string? Code;
+        public string? code { get; set; }
 
         [JsonProperty("stripe_promo_id")]
-        public object? StripePromoId;
+        public object? stripe_promo_id { get; set; }
 
         [JsonProperty("stripe_coupon_id")]
-        public object? StripeCouponId;
+        public object? stripe_coupon_id { get; set; }
 
         [JsonProperty("use_type")]
-        public string? UseType;
+        public string? use_type { get; set; }
 
         [JsonProperty("discount")]
-        public int? Discount;
+        public double? discount { get; set; }
 
         [JsonProperty("currency")]
-        public object? Currency;
+        public object? currency { get; set; }
 
         [JsonProperty("used")]
-        public int? Used;
+        public int? used { get; set; }
 
         [JsonProperty("disabled_with_volume_discounts")]
-        public bool? DisabledWithVolumeDiscounts;
+        public bool? disabled_with_volume_discounts { get; set; }
 
         [JsonProperty("all_recurring_bill_invoices")]
-        public bool? AllRecurringBillInvoices;
+        public bool? all_recurring_bill_invoices { get; set; }
 
         [JsonProperty("max_uses")]
-        public int? MaxUses;
+        public int? max_uses { get; set; }
+
+        [JsonProperty("smart_contract_address")]
+        public object? smart_contract_address { get; set; }
+
+        [JsonProperty("token_id")]
+        public object? token_id { get; set; }
+
+        [JsonProperty("blockchain")]
+        public object? blockchain { get; set; }
 
         [JsonProperty("expire_at")]
-        public object? ExpireAt;
+        public string? expire_at { get; set; }
 
         [JsonProperty("created_at")]
-        public int? CreatedAt;
+        public int? created_at { get; set; }
 
         [JsonProperty("updated_at")]
-        public int? UpdatedAt;
+        public int? updated_at { get; set; }
 
         [JsonProperty("updated_by")]
-        public int? UpdatedBy;
+        public int? updated_by { get; set; }
 
         [JsonProperty("products_count")]
-        public int? ProductsCount;
+        public int? products_count { get; set; }
     }
 
     public class Data
     {
         [JsonProperty("coupons")]
-        public List<Coupon>? Coupons;
+        public List<Coupon>? coupons;
     }
 
     public class Root
     {
         [JsonProperty("status")]
-        public int? Status;
+        public int? status { get; set; }
 
         [JsonProperty("data")]
-        public Data? Data;
+        public Data? data { get; set; }
 
         [JsonProperty("error")]
-        public object? Error;
+        public object? error { get; set; }
 
         [JsonProperty("message")]
-        public object? Message;
+        public object? message { get; set; }
 
         [JsonProperty("env")]
-        public string? Env;
+        public string? env { get; set; }
     }
+
+
 }

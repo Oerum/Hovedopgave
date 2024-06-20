@@ -27,11 +27,13 @@ namespace BoundBot.Infrastructure.AlterLicense
             _configuration = configuration;
             _connectionHandler = connectionHandler;
         }
-
+        
         async Task IAlterLicenseRepository.AlterLicense(SocketSlashCommand command, HttpClient client)
         {
             try
             {
+                await command.DeferAsync(false);
+
                 DiscordModelDtoRestModel restModel = new(command);
                 var embedBuilder = new Discord.EmbedBuilder
                 {
@@ -55,7 +57,7 @@ namespace BoundBot.Infrastructure.AlterLicense
                         };
 
                         HttpResponseMessage jwtResponseMessage =
-                            await client.PostAsJsonAsync($"/gateway/API/BC/Admin/JwtRefreshAndGenerate",
+                            await client.PostAsJsonAsync($"/API/Core/Admin/JwtRefreshAndGenerate",
                                 restModel.Model);
                         var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
                         var jwtResponseBodyDeserialization =
@@ -64,7 +66,7 @@ namespace BoundBot.Infrastructure.AlterLicense
                         client.DefaultRequestHeaders.Authorization =
                             new AuthenticationHeaderValue("Bearer", jwtResponseBodyDeserialization.AccessToken);
 
-                        HttpResponseMessage resp = await client.PutAsJsonAsync($"/gateway/API/BC/Admin/AlterLicense", postModel);
+                        HttpResponseMessage resp = await client.PutAsJsonAsync($"/API/Core/Admin/AlterLicense", postModel);
                         var responseBody = await resp.Content.ReadAsStringAsync();
 
                         if (resp.IsSuccessStatusCode)
@@ -89,18 +91,22 @@ namespace BoundBot.Infrastructure.AlterLicense
 
                 try
                 {
-                    await command.RespondAsync(embed: embedBuilder.Build());
+                    await command.ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Content = null;
+                        x.Embed = embedBuilder.Build();
+                    });
                 }
                 catch (Exception ex)
                 {
                     try
                     {
-                        DiscordSocketClient discordClient =
-                            _connectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                        var discordClient =
+                           await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                        var clientUser = await discordClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
+                        var clientUser = await discordClient.socketClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
 
-                        var privateChannel = await discordClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
+                        var privateChannel = await discordClient.socketClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
                         var textNotifier = privateChannel as IMessageChannel;
                         await textNotifier!.SendMessageAsync($"{clientUser.Mention}\n*Discord API 3S Respond TD Expired\n[Reverting To Channel Message]*", false, embedBuilder.Build());
                     }

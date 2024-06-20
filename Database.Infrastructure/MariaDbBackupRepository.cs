@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Auth.Database;
+using Auth.Database.Contexts;
 using BoundBot.Connection.DiscordConnectionHandler;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Database.Application.Interface;
@@ -33,7 +33,7 @@ public class MariaDbBackupRepository : IMariaDbBackupRepository
         {
             _logger.LogInformation("Database Backup Logic Start");
 
-            var connectionString = _configuration["ConnectionStrings:DB:BC"];
+            var connectionString = _configuration["ConnectionStrings:DB:Core"];
 
             await using var conn = new MySqlConnection(connectionString);
 
@@ -55,12 +55,12 @@ public class MariaDbBackupRepository : IMariaDbBackupRepository
 
             await conn.CloseAsync();
 
-            DiscordSocketClient client =
-                _connectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+            var client =
+                await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-            var guild = client.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
+            var guild = client.socketClient.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
             
-            var privateChannel = await client.GetChannelAsync(1094738809121423380); // backupChannel
+            var privateChannel = await client.socketClient.GetChannelAsync(1094738809121423380); // backupChannel
 
             if (privateChannel is IMessageChannel channel)
             {

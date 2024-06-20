@@ -15,7 +15,7 @@ public class HwidDomain
         else
         {
             throw new Exception($"HWID Input: `{hwid}` doesn't match required format!"
-                                + "\nYou'll find the correct HWID at the top of `A# console` when you initially load it.");
+                                + "\nYou'll find the correct HWID at the top of `Aimsharp console` when you initially load it.");
         }
     }
 }

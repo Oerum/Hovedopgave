@@ -4,8 +4,38 @@ version: '3.4'
 #docker buildx bake --builder mybuilder1 --push
 
 services:
+  website:
+    image: oerum/ms_website:8.0.5-1
+    platform: linux/amd64
+    networks: 
+      - private_network
+    hostname: website.oerumtechnologies.com
+    restart: always
+    environment:
+      - Cert__Gateway__Password=${Cert__Gateway__Password}
+      - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
+      - Serilog__Seq=${Serilog_Seq}
+      - ConnectionStrings__DB__Core=${CoreMaster} 
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+    ports:
+      - '443:443' 
+    build:
+      context: .
+      dockerfile: Website/Website/Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64/v8
+    volumes:
+      #- persistedData_Certs:/app/certs/
+      - ./Crosscutting/certs:/app/certs/
+      #- /home/bound/certs/:/app/certs/
+      #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
+
   apigateway:
-    image: DockerUser/ms_apigateway:8.0.100-1-0.1
+    image: oerum/ms_apigateway:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -15,10 +45,9 @@ services:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
       - Serilog__Seq=${Serilog_Seq}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
     ports:
-      #- '80:80'
-      - '443:443' 
+      - '44319:443' 
     build:
       context: .
       dockerfile: apigateway/Dockerfile
@@ -31,9 +60,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   boundbot:
-    image: DockerUser/ms_boundbot:8.0.100-1-0.1
+    image: oerum/ms_boundbot:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -41,7 +71,7 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
@@ -49,12 +79,17 @@ services:
       - RabbitMQ__Pass=${RabbitMQPass}
       - HttpClient__connStr=${DiscordbotHttpClientconnStr}
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+      - Encoding__Key=${EncodingKey} 
       - Discord__Guid=${DiscordGuid} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Discord__IncorrectChannel__Bot=${Discord_IncorrectChannel_Bot}
       - Store__Link__Sellix=${Store_Link_Sellix}
       - Serilog__Seq=${Serilog_Seq}
@@ -71,9 +106,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   api.auth:
-    image: DockerUser/ms_apiauth:8.0.100-1-0.1
+    image: oerum/ms_apiauth:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -81,20 +117,26 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
       - RabbitMQ__User=${RabbitMQUser} 
       - RabbitMQ__Pass=${RabbitMQPass}
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+      - Encoding__Key=${EncodingKey} 
       - Discord__Guid=${DiscordGuid} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Serilog__Seq=${Serilog_Seq}
+      - CoreFolderUpdatePath=${UpdateFolderPath}
     restart: always
     build:
       context: .
@@ -108,9 +150,11 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
+      - /home/FilipEric/Core/:/Core/
       
   api.discordbot:
-    image: DockerUser/ms_apidiscordbot:8.0.100-1-0.1
+    image: oerum/ms_apidiscordbot:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -118,13 +162,16 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
       - RabbitMQ__User=${RabbitMQUser}
       - RabbitMQ__Pass=${RabbitMQPass}
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Encoding__Key=${EncodingKey} 
+      - Discord__Id=${DiscordId}
       - Discord__Guid=${DiscordGuid}
       - MONGO__USER=${MONGODB_USER}
       - MONGO__PASSWORD=${MONGODB_PASSWORD}
@@ -133,6 +180,8 @@ services:
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Serilog__Seq=${Serilog_Seq}
     restart: always
     build:
@@ -147,9 +196,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   api.admin:
-    image: DockerUser/ms_apiadmin:8.0.100-1-0.1
+    image: oerum/ms_apiadmin:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -157,17 +207,22 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+      - Encoding__Key=${EncodingKey} 
       - Discord__Guid=${DiscordGuid} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Serilog__Seq=${Serilog_Seq}
     restart: always
     build:
@@ -182,9 +237,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   api.sellix:
-    image: DockerUser/ms_apisellix:8.0.100-1-0.1
+    image: oerum/ms_apisellix:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -192,7 +248,7 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
@@ -203,12 +259,17 @@ services:
       - SellixApi__ConnStr=${SellixApi_ConnStr} 
       - SellixApi__Token=${SellixApi_Token} 
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+      - Encoding__Key=${EncodingKey} 
       - Discord__Guid=${DiscordGuid} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Serilog__Seq=${Serilog_Seq}
     restart: always
     build:
@@ -223,17 +284,19 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   HostServices:
-    image: DockerUser/ms_hostservices:8.0.100-1-0.1
+    image: oerum/ms_hostservices:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
       - Discord__Guid=${DiscordGuid} 
       - Serilog__Seq=${Serilog_Seq}
     restart: always
@@ -249,9 +312,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   BrokersService:
-    image: DockerUser/ms_brokersservice:8.0.100-1-0.1
+    image: oerum/ms_brokersservice:8.0.5-1
     platform: linux/amd64
     networks: 
       - private_network
@@ -259,16 +323,21 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - RabbitMQ__User=${RabbitMQUser}
       - RabbitMQ__Pass=${RabbitMQPass}
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
+      - Encoding__Key=${EncodingKey} 
       - Discord__Guid=${DiscordGuid} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - MONGO__USER=${MONGODB_USER}
       - MONGO__PASSWORD=${MONGODB_PASSWORD}
       - Serilog__Seq=${Serilog_Seq}
@@ -285,9 +354,10 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   api.gpt:
-    image: DockerUser/ms_gpt:8.0.100-1-0.1
+    image: oerum/ms_gpt:8.0.5-1
     platform: linux/amd64
     hostname: api.gpt.oerumtechnologies.com
     networks: 
@@ -295,7 +365,7 @@ services:
     environment:
       - Cert__Gateway__Password=${Cert__Gateway__Password}
       - Cert__Gateway=${Cert__Gateway__Oerumtechnologies}
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
       - JWT__ValidIssuer=${JWTValidUssuer}
       - JWT__ValidAudience=${JWTValidAudience}
       - JWT__SecretKey=${JWTSecretKey}
@@ -306,12 +376,17 @@ services:
       - SellixApi__ConnStr=${SellixApi_ConnStr} 
       - SellixApi__Token=${SellixApi_Token} 
       - Discord__Token=${DiscordToken}
+      - Discord__Secret=${DiscordSecret}
+      - Discord__Id=${DiscordId}
       - Discord__Guid=${DiscordGuid} 
+      - Encoding__Key=${EncodingKey} 
       - Discord__Role__Admin=${Discord_Role_Admin}
       - Discord__Role__Staff=${Discord_Role_Staff}
       - Discord__Role__Boost=${Discord_Role_Boost}
       - Discord__Role__AIO=${Discord_Role_AIO}
       - Discord__Role__Month=${Discord_Role_Month}
+      - Discord__Role__SoD=${Discord_Role_SoD}
+      - Discord__Role__CommunityHero=${Discord_Role_CommunityHero}
       - Serilog__Seq=${Serilog_Seq}
       - OpenAI__Key=${OpenAI_Key}
     restart: always
@@ -327,15 +402,16 @@ services:
       - ./Crosscutting/certs:/app/certs/
       #- /home/bound/certs/:/app/certs/
       #- /home/ubuntu/certs/:/app/certs/
+      #- /home/FilipEric/certs/:/app/certs/
 
   efcore:
-    image: DockerUser/ms_efcore:8.0.100-1-0.1
+    image: oerum/ms_efcore:8.0.5-1
     platform: linux/amd64
     hostname: efcore.oerumtechnologies.com
     networks: 
       - private_network
     environment:
-      - ConnectionStrings__DB__BC=${BCMaster} 
+      - ConnectionStrings__DB__Core=${CoreMaster} 
     build:
       context: .
       dockerfile: EFCore/Dockerfile
@@ -539,7 +615,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: BC.Master
+      MYSQL_DATABASE: Core.Master
     volumes:
       - persistedData_MariaDb:/var/lib/mysql
     ports:
@@ -584,4 +660,5 @@ volumes:
   persistedData_RabbitMq:
   persistedData_Seq:
   persistedData_Conduktor:
+
 

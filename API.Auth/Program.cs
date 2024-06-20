@@ -3,16 +3,19 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Auth.Application.Implementation;
 using Auth.Application.Interface;
-using Auth.Database;
+using Auth.Database.Contexts;
 using Auth.Database.DbContextConfiguration;
+using Auth.Domain;
 using Auth.Infrastructure;
 using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Crosscutting.Configuration.JwtConfiguration;
+using Crosscutting.TLS.Configuration;
 using Crosscutting.TransactionHandling;
 using LoggingService.Components.SerilogConfiguration;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,13 +26,22 @@ builder.Logging.AddLoggerConfig(builder.Configuration);
 
 //DbContext
 builder.Services.AddAuthDbContext(builder.Configuration);
+builder.Services.AddOAuthContext(builder.Configuration);
 
 //Dependency Injection
 //builder.Services.AddScoped<IUnitOfWork<IdentityDb>, UnitOfWork<IdentityDb>>();
 builder.Services.AddScoped<IUnitOfWork<AuthDbContext>, UnitOfWork<AuthDbContext>>();
-builder.Services.Scan(a => a.FromCallingAssembly().AddClasses().AsMatchingInterface().WithScopedLifetime());
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IAuthImplementation, AuthImplementation>();
+builder.Services.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+builder.Services.TryAddScoped<IAuthRepository, AuthRepository>();
+builder.Services.TryAddScoped<IAuthImplementation, AuthImplementation>();
+builder.Services.TryAddScoped<IAuthDomain, AuthDomain>();
+builder.Services.TryAddScoped<IUnitOfWork<DiscordOAuthContext>, UnitOfWork<DiscordOAuthContext>>();
+
 
 // Add services to the container.
 
@@ -45,24 +57,7 @@ builder.Services.AddJwtConfiguration(builder.Configuration);
 builder.Services.AddClaimPolicyConfiguration();
 
 //TLS
-var certificate = new X509Certificate2(builder.Configuration["Cert:Gateway"]!, builder.Configuration["Cert:Gateway:Password"]);
-//builder.Services.AddDataProtection().ProtectKeysWithCertificate(certificate);
-
-builder.WebHost.UseKestrel(options =>
-{
-    var appServices = options.ApplicationServices;
-
-    options.Listen(IPAddress.Any, 80, listenOptions =>
-    {
-        listenOptions.UseConnectionLogging();
-    });
-
-    options.Listen(IPAddress.Any, 443, listenOptions =>
-    {
-        listenOptions.UseHttps(certificate);
-        listenOptions.UseConnectionLogging();
-    });
-});
+builder.WebHost.AddTLS(builder.Environment.IsDevelopment(), builder.Configuration);
 
 var app = builder.Build();
 

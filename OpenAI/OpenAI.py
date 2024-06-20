@@ -2,7 +2,7 @@ import openai
 
 #file-Kb4ToHrhl3pWMdZN7yGJ4N6b
 # Set your OpenAI API key
-openai.api_key = ""
+openai.api_key = "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"
 
 
 def Create_fine_tune_upload_file():

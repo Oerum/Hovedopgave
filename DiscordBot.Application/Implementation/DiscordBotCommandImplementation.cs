@@ -1,4 +1,4 @@
-﻿using Auth.Database;
+﻿using Auth.Database.Contexts;
 using Crosscutting;
 using Crosscutting.TransactionHandling;
 using DiscordBot.Application.Interface;

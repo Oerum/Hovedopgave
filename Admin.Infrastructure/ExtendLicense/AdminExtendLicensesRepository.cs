@@ -1,5 +1,5 @@
 ﻿using Admin.Application.Interface.ExtendLicense;
-using Auth.Database;
+using Auth.Database.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

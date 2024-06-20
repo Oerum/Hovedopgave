@@ -1,0 +1,228 @@
+﻿@page "/discord/oauth"
+@using System.ComponentModel.DataAnnotations
+@using Auth.Database.Contexts
+@using Crosscutting.TransactionHandling
+@using Microsoft.Extensions.Localization
+@using System.Web;
+@using System.Net.Http.Headers
+@using Newtonsoft.Json
+@inject IStringLocalizer<Resources.OAuthPage> localizer;
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration;
+@inject ILogger<OAuth> Logger
+@inject DiscordOAuthContext _oauthContext
+@inject IUnitOfWork<DiscordOAuthContext> _oauthUnitOfWork
+
+@rendermode RenderMode.InteractiveServer
+@attribute [StreamRendering(true)]
+
+<section class="layout" id="animation">
+    <article class="authcontent">
+        @if (Success)
+        {
+            <h1>@localizer["Authorization successful"]</h1>
+            <p>@localizer["Core has been authorized to login with your information."]</p>
+            <p>Username: @DiscordUsername | Id: @DiscordId |  Email: @DiscordEmail</p>
+            <p>@localizer["You can close this window now."]</p>
+            <p>@localizer["Next auth:"] @DateTime.UtcNow.AddHours(24).ToString("dd/MM/yy HH:mm")</p>
+            <img src='https://i.imgur.com/UkM4hY7.png' alt='Core'>
+        }
+        else if (isError)
+        {
+            <h1>@localizer["Authorization failed"]</h1>
+            <p>@localizer["An error occurred while processing your request."]</p>
+            <p>@localizer["Please try again later."]</p>
+            <img src='https://i.imgur.com/UkM4hY7.png' alt='Core'>
+        }
+        else
+        {
+            <h1>@localizer["Processing..."]</h1>
+            <p>@localizer["Please wait while we process your request."]</p>
+            <img src='https://i.imgur.com/UkM4hY7.png' alt='Core'>
+        }
+    </article>
+</section>
+
+@code {
+    private IJSObjectReference? _animatedBackground;
+
+    public bool Success { get; set; }
+    public bool isError { get; set; }
+
+    [Parameter]
+    public string? AuthorizationCode { get; set; }
+
+    public string? State { get; set; }
+    public string? DiscordUsername { get; set; }
+    public string? DiscordId { get; set; }
+    public string? DiscordEmail { get; set; }
+
+    public bool isInitialized { get; set; }
+
+    HttpClient httpClient = new HttpClient();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _animatedBackground = await JS.InvokeAsync<IJSObjectReference>("import", "/JS/Discord.oAuth/animated-background.js");
+
+            // Check if AuthorizationCode is already present in local storage
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            var authorizationCode = HttpUtility.ParseQueryString(uri.Query).Get("code");
+            var state = HttpUtility.ParseQueryString(uri.Query).Get("state");
+
+            if (!string.IsNullOrEmpty(authorizationCode) && string.IsNullOrEmpty(State))
+            {
+                // AuthorizationCode is not present in local storage, process OAuth flow
+                try
+                {
+                    var userData = await GetDiscordUserInformationAsync(authorizationCode!);
+                    State = state!;
+                    Success = true;
+
+                    if (userData != null)
+                    {
+                        await _oauthUnitOfWork.CreateTransaction(System.Data.IsolationLevel.ReadCommitted);
+
+                        var stateExists = _oauthContext.OAuth.Any(x => x.State == state);
+
+                        var user = new Auth.Database.Model.DiscordOAuthModel
+                        {
+                            State = state,
+                            Expires_at = DateTime.UtcNow.AddHours(1),
+                            Id = userData.Id,
+                            Username = userData.Username,
+                            Discriminator = userData.Discriminator,
+                            Global_name = userData.Global_name,
+                            Avatar = userData.Avatar,
+                            Bot = userData.Bot,
+                            System = userData.System,
+                            Mfa_enabled = userData.Mfa_enabled,
+                            Banner = userData.Banner,
+                            Accent_color = userData.Accent_color,
+                            Locale = userData.Locale,
+                            Verified = userData.Verified,
+                            Email = userData.Email,
+                            Flags = userData.Flags,
+                            Premium_type = userData.Premium_type,
+                            Public_flags = userData.Public_flags,
+                            Avatar_decoration = userData.Avatar_decoration
+                        };
+
+                        _ = stateExists ? _oauthContext.OAuth.Update(user) : _oauthContext.OAuth.Add(user);
+
+                        await _oauthContext.SaveChangesAsync();
+                        await _oauthUnitOfWork.Commit();
+                    }
+                }
+                catch (Exception e)
+                {
+                    await _oauthUnitOfWork.Rollback();
+                    isError = true;
+                    Logger.LogError(e, "Error while getting user information");
+                }
+
+                StateHasChanged();
+            }
+            else
+            {
+                return;
+            }
+
+            isInitialized = true;
+        }
+    }
+
+    private async Task<DiscordOauthToken> GetDiscordOAuthTokenAsync(string authorizationCode)
+    {
+        var secret = Configuration["Discord:Secret"];
+        var id = Configuration["Discord:Id"];
+        var redirect = $"{Navigation.BaseUri}discord/oauth";
+
+        var content = new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string, string>("grant_type", "authorization_code"),
+            new KeyValuePair<string, string>("code", authorizationCode),
+            new KeyValuePair<string, string>("redirect_uri", redirect),
+            new KeyValuePair<string, string>("client_id", id!),
+            new KeyValuePair<string, string>("client_secret", secret!)
+        });
+
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+        var tokenResponse = await httpClient.PostAsync("https://discord.com/api/oauth2/token", content);
+
+        if (tokenResponse.IsSuccessStatusCode)
+        {
+            var token = await tokenResponse.Content.ReadFromJsonAsync<DiscordOauthToken>();
+
+            if (token != null)
+            {
+                return token;
+            }
+        }
+
+        throw new Exception("Error while getting token");
+    }
+
+    private async Task<DiscordOAuthUserStructure> GetDiscordUserInformationAsync(string authorizationCode)
+    {
+        if (string.IsNullOrEmpty(authorizationCode))
+        {
+            throw new Exception("Authorization code not found");
+        }
+
+        var token = await GetDiscordOAuthTokenAsync(authorizationCode);
+
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token?.access_token);
+        var userResponse = await httpClient.GetAsync("https://discord.com/api/users/@me");
+
+        if (userResponse.IsSuccessStatusCode)
+        {
+            var userJson = JsonConvert.DeserializeObject<DiscordOAuthUserStructure>(await userResponse.Content.ReadAsStringAsync());
+
+            if (userJson != null)
+            {
+                DiscordUsername = userJson.Username;
+                DiscordId = userJson.Id.ToString();
+                DiscordEmail = userJson.Email;
+                                
+                return userJson;
+            }
+        }
+
+        throw new Exception("Error while getting user information");
+    }
+
+    private class DiscordOauthToken
+    {
+        public string? access_token { get; set; }
+        public string? token_type { get; set; }
+        public int expires_in { get; set; }
+        public string? refresh_token { get; set; }
+        public string? scope { get; set; }
+        public string? state { get; set; }
+    }
+
+    private class DiscordOAuthUserStructure
+    {
+        public ulong Id { get; set; }
+        public string? Username { get; set; }
+        public string? Discriminator { get; set; }
+        public string? Global_name { get; set; }
+        public string? Avatar { get; set; }
+        public bool? Bot { get; set; }
+        public bool? System { get; set; }
+        public bool? Mfa_enabled { get; set; }
+        public string? Banner { get; set; }
+        public int? Accent_color { get; set; }
+        public string? Locale { get; set; }
+        public bool? Verified { get; set; }
+        public string? Email { get; set; }
+        public int? Flags { get; set; }
+        public int? Premium_type { get; set; }
+        public int? Public_flags { get; set; }
+        public string? Avatar_decoration { get; set; }
+    }
+}

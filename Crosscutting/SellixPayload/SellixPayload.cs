@@ -29,7 +29,7 @@ namespace Crosscutting.SellixPayload
 
         public class CustomFields
         {
-            [JsonProperty("Hwid")]
+            [JsonProperty("hwid")]
             public string HWID;
 
             [JsonProperty("name")]
@@ -741,6 +741,9 @@ namespace Crosscutting.SellixPayload
             [JsonProperty("coupon_id")]
             public object CouponId;
 
+            [JsonProperty("coupon_code")]
+            public string CouponCode;
+
             [JsonProperty("custom_fields")]
             public CustomFields CustomFields;
 
@@ -826,7 +829,7 @@ namespace Crosscutting.SellixPayload
             public string StripePublishableKey;
 
             [JsonProperty("products")]
-            public List<object> Products;
+            public List<Products> Products;
 
             [JsonProperty("gateways_available")]
             public List<string> GatewaysAvailable;
@@ -994,11 +997,277 @@ namespace Crosscutting.SellixPayload
             public double? CreatedAt;
         }
 
+        public class Products
+        {
+            [JsonProperty("id")]
+            public double? Id;
 
+            [JsonProperty("uniqid")]
+            public string Uniqid;
 
+            [JsonProperty("title")]
+            public string Title;
 
+            [JsonProperty("description")]
+            public string Description;
+
+            [JsonProperty("price_display")]
+            public double? PriceDisplay;
+
+            [JsonProperty("currency")]
+            public string Currency;
+
+            [JsonProperty("type")]
+            public string Type;
+
+            [JsonProperty("quantity_warning")]
+            public double? QuantityWarning;
+
+            [JsonProperty("stock")]
+            public double? Stock;
+
+            [JsonProperty("warranty")]
+            public double? Warranty;
+
+            [JsonProperty("gateways")]
+            public string Gateways;
+
+            [JsonProperty("block_vpn_proxies")]
+            public double? BlockVpnProxies;
+
+            [JsonProperty("max_risk_level")]
+            public double? MaxRiskLevel;
+
+            [JsonProperty("volume_discounts")]
+            public string VolumeDiscounts;
+
+            [JsonProperty("discord_integration")]
+            public double? DiscordIntegration;
+
+            [JsonProperty("discord_set_role")]
+            public double? DiscordSetRole;
+
+            [JsonProperty("discord_role_id")]
+            public string DiscordRoleId;
+
+            [JsonProperty("discord_server_id")]
+            public string DiscordServerId;
+
+            [JsonProperty("discord_remove_role")]
+            public double? DiscordRemoveRole;
+
+            [JsonProperty("discord_optional")]
+            public double? DiscordOptional;
+
+            [JsonProperty("unit_quantity")]
+            public double? UnitQuantity;
+
+            [JsonProperty("unit_price")]
+            public string UnitPrice;
+
+            [JsonProperty("unit_price_display")]
+            public double? UnitPriceDisplay;
+
+            [JsonProperty("volume_discount")]
+            public string VolumeDiscount;
+
+            [JsonProperty("volume_discount_display")]
+            public string VolumeDiscountDisplay;
+
+            [JsonProperty("affiliate_revenue_percent")]
+            public string AffiliateRevenuePercent;
+
+            [JsonProperty("status")]
+            public string Status;
+
+            [JsonProperty("image_name")]
+            public string ImageName;
+
+            [JsonProperty("image_storage")]
+            public string ImageStorage;
+
+            [JsonProperty("cloudflare_image_id")]
+            public string CloudflareImageId;
+
+            [JsonProperty("price_conversions")]
+            public PriceConversions PriceConversions;
+        }
+
+        public class Crypto
+        {
+            [JsonProperty("BTC")]
+            public string BTC;
+
+            [JsonProperty("DOGE")]
+            public string DOGE;
+
+            [JsonProperty("BNB")]
+            public string BNB;
+
+            [JsonProperty("ETH")]
+            public string ETH;
+
+            [JsonProperty("LTC")]
+            public string LTC;
+
+            [JsonProperty("BCH")]
+            public string BCH;
+
+            [JsonProperty("NANO")]
+            public string NANO;
+
+            [JsonProperty("XMR")]
+            public string XMR;
+
+            [JsonProperty("SOL")]
+            public string SOL;
+
+            [JsonProperty("XRP")]
+            public string XRP;
+
+            [JsonProperty("CRO")]
+            public string CRO;
+
+            [JsonProperty("USDC")]
+            public string USDC;
+
+            [JsonProperty("USDC_NATIVE")]
+            public string USDC_NATIVE;
+
+            [JsonProperty("USDT")]
+            public string USDT;
+
+            [JsonProperty("TRX")]
+            public string TRX;
+
+            [JsonProperty("CCD")]
+            public string CCD;
+
+            [JsonProperty("MATIC")]
+            public string MATIC;
+
+            [JsonProperty("APE")]
+            public string APE;
+
+            [JsonProperty("PEPE")]
+            public string PEPE;
+
+            [JsonProperty("DAI")]
+            public string DAI;
+
+            [JsonProperty("WETH")]
+            public string WETH;
+
+            [JsonProperty("SHIB")]
+            public string SHIB;
+        }
+
+        public class PriceConversions
+        {
+            [JsonProperty("CAD")]
+            public double CAD;
+
+            [JsonProperty("HKD")]
+            public double HKD;
+
+            [JsonProperty("ISK")]
+            public double ISK;
+
+            [JsonProperty("PHP")]
+            public double PHP;
+
+            [JsonProperty("DKK")]
+            public double DKK;
+
+            [JsonProperty("HUF")]
+            public double HUF;
+
+            [JsonProperty("CZK")]
+            public double CZK;
+
+            [JsonProperty("GBP")]
+            public double GBP;
+
+            [JsonProperty("RON")]
+            public double RON;
+
+            [JsonProperty("SEK")]
+            public double SEK;
+
+            [JsonProperty("IDR")]
+            public double IDR;
+
+            [JsonProperty("INR")]
+            public double INR;
+
+            [JsonProperty("BRL")]
+            public double BRL;
+
+            [JsonProperty("RUB")]
+            public double RUB;
+
+            [JsonProperty("HRK")]
+            public double HRK;
+
+            [JsonProperty("JPY")]
+            public double JPY;
+
+            [JsonProperty("THB")]
+            public double THB;
+
+            [JsonProperty("CHF")]
+            public double CHF;
+
+            [JsonProperty("EUR")]
+            public double EUR;
+
+            [JsonProperty("MYR")]
+            public double MYR;
+
+            [JsonProperty("BGN")]
+            public double BGN;
+
+            [JsonProperty("TRY")]
+            public double TRY;
+
+            [JsonProperty("CNY")]
+            public double CNY;
+
+            [JsonProperty("NOK")]
+            public double NOK;
+
+            [JsonProperty("NZD")]
+            public double NZD;
+
+            [JsonProperty("ZAR")]
+            public double ZAR;
+
+            [JsonProperty("USD")]
+            public double USD;
+
+            [JsonProperty("MXN")]
+            public double MXN;
+
+            [JsonProperty("SGD")]
+            public double SGD;
+
+            [JsonProperty("AUD")]
+            public double AUD;
+
+            [JsonProperty("ILS")]
+            public double ILS;
+
+            [JsonProperty("KRW")]
+            public double KRW;
+
+            [JsonProperty("PLN")]
+            public double PLN;
+
+            [JsonProperty("crypto")]
+            public Crypto crypto;
+        }
     }
+}
 
 #pragma warning restore CS8618
 
-}

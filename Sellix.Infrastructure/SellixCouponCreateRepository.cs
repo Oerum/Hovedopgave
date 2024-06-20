@@ -36,13 +36,13 @@ public class SellixCouponCreateRepository : ISellixCouponCreateRepository
 
                     var couponsJsonBody = JsonConvert.DeserializeObject<SellixCouponObject.Root>(couponsBody);
 
-                    if (couponsJsonBody is { Data.Coupons: not null })
+                    if (couponsJsonBody is { data.coupons: not null })
                     {
-                        foreach (var coupon in couponsJsonBody.Data?.Coupons!)
+                        foreach (var coupon in couponsJsonBody.data?.coupons!)
                         {
-                            if (coupon.Code == discordId)
+                            if (coupon.code == discordId)
                             {
-                                await _httpClient.DeleteAsync($"coupons/:{coupon.Uniqid}");
+                               var delete = await _httpClient.DeleteAsync($"coupons/{coupon.uniqid}");
                             }
                         }
                     }

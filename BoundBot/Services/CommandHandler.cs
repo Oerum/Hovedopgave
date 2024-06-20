@@ -1,17 +1,8 @@
-﻿using System.Diagnostics;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using BoundBot.Components.JwtDto;
-using Gpt.Components;
-using Newtonsoft.Json;
-using System.Net.Http.Headers;
-using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
-using Crosscutting;
-using System.Net.Http.Json;
-using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -56,8 +47,7 @@ namespace BoundBot.Services
 
             foreach (var command in _commands.Commands)
             {
-                _logger.LogInformation("Text Commands Initiated: ", command.Name);
-                Console.WriteLine(command.Name);
+                _logger.LogInformation($"Text Command Initialized: {command.Name}");
             }
         }
 

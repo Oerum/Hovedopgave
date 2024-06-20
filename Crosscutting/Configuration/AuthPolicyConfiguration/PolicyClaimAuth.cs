@@ -1,47 +1,56 @@
-﻿using System.Runtime.CompilerServices;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Crosscutting.Configuration.AuthPolicyConfiguration;
-
 public static class PolicyClaimAuth
 {
-    public static IEnumerable<Claim> ClaimsConfiguration(IConfiguration configuration, DiscordModelDto? model = null, string? hwid = null)
+    public static IEnumerable<Claim> ClaimsConfiguration(IConfiguration configuration, ILogger logger, DiscordModelDto? model = null,  string? hwid = null)
     {
-        string adminRoleId = configuration["Discord:Role:Admin"] ?? string.Empty;
-        string staffRoleId = configuration["Discord:Role:Staff"] ?? string.Empty;
-        string boosterId = configuration["Discord:Role:Boost"] ?? string.Empty;
-
-        var claims = new List<Claim>
+        try
         {
-            new("user", "user"),
-        };
+            string adminRoleId = configuration["Discord:Role:Admin"] ?? string.Empty;
+            string staffRoleId = configuration["Discord:Role:Staff"] ?? string.Empty;
+            string boosterId = configuration["Discord:Role:Boost"] ?? string.Empty;
 
-        if (model != null)
-        {
-            var roles = new HashSet<string>(model.Roles!);
-
-            if (roles.Contains(adminRoleId) || roles.Contains("Mod"))
+            var claims = new List<Claim>
             {
-                claims.Add(new Claim("admin", "admin"));
+                new("user", "user"),
+            };
+
+            if (model != null)
+            {
+                var roles = new HashSet<string>(model.Roles ?? []);
+
+                if (roles.Contains(adminRoleId) || roles.Contains("[ARTIFACT]"))
+                {
+                    claims.Add(new Claim("admin", "admin"));
+                }
+
+                if (roles.Contains(staffRoleId) || roles.Contains("[LEGENDARY]"))
+                {
+                    claims.Add(new Claim("staff", "staff"));
+                }
+
+                if (roles.Contains(boosterId) || roles.Contains("[TOKEN]"))
+                {
+                    claims.Add(new Claim("booster", "booster"));
+                }
             }
 
-            if (roles.Contains(staffRoleId) || roles.Contains("Staff"))
+            if (!string.IsNullOrEmpty(hwid))
             {
-                claims.Add(new Claim("staff", "staff"));
+                claims.Add(new Claim("hwid", "hwid"));
             }
 
-            if (roles.Contains(boosterId) || roles.Contains("Server Booster"))
-            {
-                claims.Add(new Claim("booster", "booster"));
-            }
+            logger.LogInformation($"HWID: {hwid} User: {model?.DiscordUsername ?? "NONE"} Claims: {string.Join(", ", claims)}");
+
+            return claims;
         }
-
-        if (!string.IsNullOrEmpty(hwid))
+        catch (Exception ex)
         {
-            claims.Add(new Claim("hwid", "hwid"));
+            logger.LogError($"Unsuccessful Claims Configuration: {1}", ex.Message);
+            throw;
         }
-
-        return claims;
     }
 }

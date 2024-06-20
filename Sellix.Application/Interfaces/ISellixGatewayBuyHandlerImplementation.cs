@@ -4,6 +4,6 @@ namespace Sellix.Application.Interfaces
 {
     public interface ISellixGatewayBuyHandlerImplementation
     {
-        Task<bool> OrderHandler(JsonObject root);
+        Task<bool> OrderSubmit(JsonObject root);
     }
 }

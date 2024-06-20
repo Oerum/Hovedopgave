@@ -32,7 +32,7 @@ public class UpdateDiscordImplementation : IUpdateDiscordImplementation
         }
         catch (Exception ex)
         {
-            _logger.LogError("1", ex);
+            _logger.LogError(ex, "Error in UpdateDiscordImplementation");
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using Admin.Application.Interface.AlterLicense;
-using Admin.Application.Interface.ExtendLicense;
-using Admin.Application.Interface.GrantLicense;
 using Crosscutting;
+using Crosscutting.Configuration.AuthPolicyConfiguration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Admin.Controllers
 {
-    [Route("API/BC/Admin/")]
+    [Route("API/Core/Admin/")]
     public class AdminAlterLicenseController : Controller
     {
         private readonly IAlterLicenseImplementation _alterLicense;
@@ -18,8 +17,7 @@ namespace API.Admin.Controllers
             _alterLicense = alterLicense;
         }
 
-        [Authorize(Policy = "admin")]
-        [Authorize(Policy = "staff")]
+        [Authorize(Policy = PolicyConfiguration.AdminOrStaff)]
         [HttpPut("AlterLicense")]
         public async Task<IActionResult> AlterLicenses([FromBody] AlterLicenseDTO model)
         {

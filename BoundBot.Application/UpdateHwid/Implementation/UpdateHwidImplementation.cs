@@ -34,7 +34,7 @@ public class UpdateHwidImplementation : IUpdateHwidImplementation
         }
         catch (Exception ex)
         {
-            _logger.LogError("1", ex);
+            _logger.LogError(ex, "Error in UpdateHwidImplementation");
         }
     }
 }

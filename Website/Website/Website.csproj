@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>1df78a5f-dec6-4ed6-8807-30f2f214cccf</UserSecretsId>
+    <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+	<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Components\Layout\MainLayout.razor" />
+    <None Include="Components\Pages\Error.razor" />
+    <None Include="Components\Pages\OAuth.razor" />
+    <None Include="wwwroot\bootstrap\bootstrap.min.css.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Auth.Database\Auth.Database.csproj" />
+    <ProjectReference Include="..\..\Crosscutting\Crosscutting.csproj" />
+    <ProjectReference Include="..\..\LoggingService.Components\LoggingService.Components.csproj" />
+    <ProjectReference Include="..\Website.Client\Website.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\JS\Discord.oAuth\" />
+  </ItemGroup>
+
+</Project>

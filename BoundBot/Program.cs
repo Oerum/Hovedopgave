@@ -4,8 +4,6 @@ using BoundBot.Application.CheckLicenses.Implementation;
 using BoundBot.Application.CheckLicenses.Interface;
 using BoundBot.Application.DatabaseBackup.Implementation;
 using BoundBot.Application.DatabaseBackup.Interface;
-using BoundBot.Application.EmbedBuilder.Implementation;
-using BoundBot.Application.EmbedBuilder.Interface;
 using BoundBot.Application.ExtendLicenses.Implementation;
 using BoundBot.Application.ExtendLicenses.Interface;
 using BoundBot.Application.GetCoupon.Implementation;
@@ -28,7 +26,6 @@ using BoundBot.Components.Members;
 using BoundBot.Infrastructure.AdminCheckLicenses;
 using BoundBot.Infrastructure.CheckLicenses;
 using BoundBot.Infrastructure.DatabaseBackup;
-using BoundBot.Infrastructure.EmbedBuilder;
 using BoundBot.Infrastructure.ExtendLicenses;
 using BoundBot.Infrastructure.GetCoupon;
 using BoundBot.Infrastructure.Gpt;
@@ -50,14 +47,13 @@ using Microsoft.Extensions.Logging;
 using BoundBot.Application.AlterLicense.Interface;
 using BoundBot.Infrastructure.AlterLicense;
 using BoundBot.Application.AlterLicense.Implementation;
+using System.Reflection.Emit;
 
 namespace BoundBot;
 
 public class DiscordBot
 {
-    public static Task Main(string[] args) => new DiscordBot().MainAsync();
-
-    async Task MainAsync()
+    public static async Task Main()
     {
         var configBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
@@ -77,83 +73,90 @@ public class DiscordBot
 
         var connectionHandler = serviceProvider.GetService<IDiscordConnectionHandler>();
 
-        service.AddSingleton(connectionHandler!.GetDiscordSocketClient(configBuilder["Discord:Token"] ?? string.Empty));
-        service.AddSingleton(connectionHandler.GetCommandService());
-        service.AddScoped<IDomainRoleCheck, DomainRoleCheck>();
-        service.AddScoped<IEmbedBuilderRepository, EmbedBuilderRepository>();
-        service.AddScoped<IEmbedBuilderImplementation, EmbedBuilderImplementation>();
-        service.AddScoped<IUpdateDiscordImplementation, UpdateDiscordImplementation>();
-        service.AddScoped<IUpdateDiscordRepository, UpdateDiscordRepository>();
-        service.AddScoped<IUpdateHwidImplementation, UpdateHwidImplementation>();
-        service.AddScoped<IUpdateHwidRepository, UpdateHwidRepository>();
-        service.AddScoped<ICheckLicenseImplementation, CheckLicenseImplementation>();
-        service.AddScoped<ICheckLicenseRepository, CheckLicenseRepository>();
-        service.AddScoped<IGetSellixCouponImplementation, GetSellixCouponImplementation>();
-        service.AddScoped<IGetSellixCouponRepository, GetSellixCouponRepository>();
-        service.AddScoped<IAdminCheckLicensesImplementation, AdminCheckLicensesImplementation>();
-        service.AddScoped<IAdminCheckLicensesRepository, AdminCheckLicensesRepository>();
-        service.AddScoped<IStaffLicenseImplementation, StaffLicenseImplementation>();
-        service.AddScoped<IStaffLicenseRepository, StaffLicenseRepository>();
-        service.AddScoped<IExtendLicensesImplementation, ExtendLicensesImplementation>();
-        service.AddScoped<IExtendLicensesRepository, ExtendLicensesRepository>();
-        service.AddScoped<IDatabaseBackupImplementation, DatabaseBackupImplementation>();
-        service.AddScoped<IDatabaseBackupRepository, DatabaseBackupRepository>();
-        service.AddScoped<IGrantLicenseImplementation, GrantLicenseImplementation>();
-        service.AddScoped<IGrantLicenseRepository, GrantLicenseRepository>();
-        service.AddScoped<IGptDiscordRepository, GptDiscordRepository>();
-        service.AddScoped<IGptDiscordImplementation, GptDiscordImplementation>();
-        service.AddScoped<IOnUserJoinRepository, OnUserJoinRepository>();
-        service.AddScoped<IOnUserJoinImplementation, OnUserJoinImplementation>();
-        service.AddScoped<IAlterLicenseImplementation, AlterLicenseImplementation>();
-        service.AddScoped<IAlterLicenseRepository, AlterLicenseRepository>();
+        service.Scan(scan => scan
+            .FromExecutingAssembly()
+            .AddClasses()
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+        service.TryAddScoped<IDomainRoleCheck, DomainRoleCheck>();
+        service.TryAddScoped<IUpdateDiscordImplementation, UpdateDiscordImplementation>();
+        service.TryAddScoped<IUpdateDiscordRepository, UpdateDiscordRepository>();
+        service.TryAddScoped<IUpdateHwidImplementation, UpdateHwidImplementation>();
+        service.TryAddScoped<IUpdateHwidRepository, UpdateHwidRepository>();
+        service.TryAddScoped<ICheckLicenseImplementation, CheckLicenseImplementation>();
+        service.TryAddScoped<ICheckLicenseRepository, CheckLicenseRepository>();
+        service.TryAddScoped<IGetSellixCouponImplementation, GetSellixCouponImplementation>();
+        service.TryAddScoped<IGetSellixCouponRepository, GetSellixCouponRepository>();
+        service.TryAddScoped<IAdminCheckLicensesImplementation, AdminCheckLicensesImplementation>();
+        service.TryAddScoped<IAdminCheckLicensesRepository, AdminCheckLicensesRepository>();
+        service.TryAddScoped<IStaffLicenseImplementation, StaffLicenseImplementation>();
+        service.TryAddScoped<IStaffLicenseRepository, StaffLicenseRepository>();
+        service.TryAddScoped<IExtendLicensesImplementation, ExtendLicensesImplementation>();
+        service.TryAddScoped<IExtendLicensesRepository, ExtendLicensesRepository>();
+        service.TryAddScoped<IDatabaseBackupImplementation, DatabaseBackupImplementation>();
+        service.TryAddScoped<IDatabaseBackupRepository, DatabaseBackupRepository>();
+        service.TryAddScoped<IGrantLicenseImplementation, GrantLicenseImplementation>();
+        service.TryAddScoped<IGrantLicenseRepository, GrantLicenseRepository>();
+        service.TryAddScoped<IGptDiscordRepository, GptDiscordRepository>();
+        service.TryAddScoped<IGptDiscordImplementation, GptDiscordImplementation>();
+        service.TryAddScoped<IOnUserJoinRepository, OnUserJoinRepository>();
+        service.TryAddScoped<IOnUserJoinImplementation, OnUserJoinImplementation>();
+        service.TryAddScoped<IAlterLicenseImplementation, AlterLicenseImplementation>();
+        service.TryAddScoped<IAlterLicenseRepository, AlterLicenseRepository>();
         service.TryAddSingleton<IDiscordServerMembersHandler, DiscordServerMembersHandler>();
 
         service.AddSingleton<AiModule>();
 
         service.AddLogging(x => x.AddLoggerConfig(configBuilder));
 
-        service.AddSingleton<SlashCommandsHandler>();
-        service.AddSingleton<CommandHandler>();
-        service.AddSingleton<SlashCommandsBuilder>();
-        service.AddSingleton<CommandService>();
+        service.TryAddSingleton<SlashCommandsHandler>();
+        service.TryAddSingleton<CommandHandler>();
+        service.TryAddSingleton<SlashCommandsBuilder>();
+        service.TryAddSingleton<CommandService>();
 
         serviceProvider = service.BuildServiceProvider();
 
-        DiscordSocketClient client = serviceProvider.GetService<DiscordSocketClient>()!;
-        CommandService commandService = serviceProvider.GetRequiredService<CommandService>();
+        var (socketClient, restClient) = await connectionHandler!.GetDiscordSocketRestClient(configBuilder["Discord:Token"] ?? string.Empty, true);
+        service.AddSingleton(socketClient);
+        service.TryAddScoped(_ => restClient);
 
-        client.Log += (logMessage) => LogAsync(logMessage, serviceProvider.GetRequiredService<ILogger<DiscordBot>>());
+        serviceProvider = service.BuildServiceProvider();
+
+        CommandService commandService = connectionHandler!.GetCommandService();
+
+        socketClient.Log += (logMessage) => LogAsync(logMessage, serviceProvider.GetRequiredService<ILogger<DiscordBot>>());
+        restClient.Log += (logMessage) => LogAsync(logMessage, serviceProvider.GetRequiredService<ILogger<DiscordBot>>());
 
         var onMembersJoinLeaveEvent = serviceProvider.GetService<IDiscordServerMembersHandler>();
 
         var chandler = serviceProvider.GetService<CommandHandler>();
-        await chandler?.InstallCommandsAsync(serviceProvider)!;
-
         var builder = serviceProvider.GetService<SlashCommandsBuilder>();
-        
-        client.Ready += async () =>
+
+        socketClient.Ready += async () =>
         {
-            await builder!.Client_Ready();
-            await onMembersJoinLeaveEvent!.Initialize(client);
+            await chandler?.InstallCommandsAsync(serviceProvider)!;
+            await builder!.InstallSlashCommandsAsync();
+            await onMembersJoinLeaveEvent!.Initialize(socketClient);
+            await LogAsync(new LogMessage(LogSeverity.Info, "DiscordBot", "Bot is Ready"), serviceProvider.GetRequiredService<ILogger<DiscordBot>>());
         };
 
         var sHandler = serviceProvider.GetService<SlashCommandsHandler>();
-        client.SlashCommandExecuted += sHandler!.SlashCommandHandler;
+        socketClient.SlashCommandExecuted += sHandler!.SlashCommandHandler;
 
         var onJoinEvent = serviceProvider.GetService<IOnUserJoinImplementation>();
         // Register event handler for UserJoined
-        client.UserJoined += async (user) =>
+        socketClient.UserJoined += async (user) =>
         {
             await onJoinEvent!.UserJoined(user);
             await onMembersJoinLeaveEvent!.Add(user);
         };
 
-        client.UserLeft += async (guild, user) =>
+        socketClient.UserLeft += async (guild, user) =>
         {
             await onMembersJoinLeaveEvent!.Remove(guild, user);
         };
 
-        // Block this task until the program is closed.
         await Task.Delay(Timeout.Infinite);
     }
 
@@ -162,9 +165,21 @@ public class DiscordBot
     //AddTransient is used when you want to create a new instance of a service every time it is requested.This means that if you request the same service multiple times, you'll get a different instance each time.
     //AddSingleton is used when you want to create a single instance of a service for the lifetime of the application.This means that if you request the same service multiple times, you'll get the same instance each time.
 
-    private Task LogAsync(LogMessage logMessage, ILogger logger)
+    private static Task LogAsync(LogMessage logMessage, ILogger logger)
     {
-        logger.LogInformation(logMessage.ToString());
+        var severity = logMessage.Severity;
+
+        logger.Log(severity switch
+        {
+            LogSeverity.Critical => LogLevel.Critical,
+            LogSeverity.Error => LogLevel.Error,
+            LogSeverity.Warning => LogLevel.Warning,
+            LogSeverity.Info => LogLevel.Information,
+            LogSeverity.Verbose => LogLevel.Trace,
+            LogSeverity.Debug => LogLevel.Debug,
+            _ => LogLevel.Information
+        }, logMessage.ToString());
+
         Console.WriteLine(logMessage.ToString());
         return Task.CompletedTask;
     }

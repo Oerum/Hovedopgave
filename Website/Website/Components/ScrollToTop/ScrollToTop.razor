@@ -1,0 +1,55 @@
+﻿
+@rendermode RenderMode.InteractiveServer
+
+@inject IJSRuntime JSRuntime
+
+<button type="button" class="scroll-to-top-btn" title="scrollToTop">
+    <i id="arrow" class="bi bi-arrow-up-short"></i>
+</button>
+
+@code {
+    private IJSObjectReference? _JsScrollToTop;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _JsScrollToTop = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/JS/ScrollToTop/scrollToTop.js");
+        }
+    }
+
+    private async Task ScrollToTopEvent()
+    {
+        if (_JsScrollToTop != null)
+            await _JsScrollToTop.InvokeVoidAsync("scrollToTop");
+    }
+}
+
+<style>
+    .scroll-to-top-btn {
+        position: fixed;
+        bottom: 75px;
+        right: 20px;
+        opacity: 0; /* Start with opacity 0 */
+        visibility: hidden; /* Start hidden */
+        background-color: rgb(10, 186, 181);
+        color: white;
+        border: none;
+        border-radius: 100px;
+        cursor: pointer;
+        transition: opacity 0.5s, visibility 0.5s; /* Add transition to opacity and visibility */
+        width: 40px;
+        height: 40px;
+    }
+        .scroll-to-top-btn.show {
+            opacity: 1; /* Make visible */
+            visibility: visible; /* Make visible */
+        }
+
+    #arrow {
+        width: 100px;
+        font:900;
+        font-size: 30px;
+        border-radius: 100px;
+    }
+</style>

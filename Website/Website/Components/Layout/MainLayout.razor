@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <NavBar />
+
+    <main class="main-body" id="main-body">
+        <article class="content">
+            @Body
+        </article>
+        <Website.Components.Footer.Footer />
+        <Website.Components.ScrollToTop.ScrollToTop />
+
+    </main>
+
+</div>
+
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

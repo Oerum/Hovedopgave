@@ -4,6 +4,7 @@ using BoundBot.Components.RestModel;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -17,13 +18,13 @@ public class GetSellixCouponRepository : IGetSellixCouponRepository
 {
     private readonly ILogger<GetSellixCouponRepository> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IDiscordConnectionHandler _discordConnectionHandler;
+    private readonly IDiscordConnectionHandler _ConnectionHandler;
 
     public GetSellixCouponRepository(ILogger<GetSellixCouponRepository> logger, IConfiguration configuration, IDiscordConnectionHandler discordConnectionHandler)
     {
         _logger = logger;
         _configuration = configuration;
-        _discordConnectionHandler = discordConnectionHandler;
+        _ConnectionHandler = discordConnectionHandler;
     }
 
 
@@ -31,6 +32,8 @@ public class GetSellixCouponRepository : IGetSellixCouponRepository
     {
         try
         {
+            await command.DeferAsync(false);
+
             DiscordModelDtoRestModel restModel = new(command);
             var embedBuilder = new Discord.EmbedBuilder
             {
@@ -39,7 +42,7 @@ public class GetSellixCouponRepository : IGetSellixCouponRepository
 
             if (restModel.Model.Roles!.Contains(_configuration["Discord:Role:Boost"]!))
             {
-                HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/gateway/API/Sellix/JwtRefreshAndGenerate", restModel.Model);
+                HttpResponseMessage jwtResponseMessage = await client.PostAsJsonAsync($"/API/Sellix/JwtRefreshAndGenerate", restModel.Model);
                 var jwtResponseBody = await jwtResponseMessage.Content.ReadAsStringAsync();
                 var jwtResponseBodyDeserialization = JsonConvert.DeserializeObject<DiscordBotJwtDto>(jwtResponseBody) ?? new DiscordBotJwtDto();
 
@@ -50,7 +53,7 @@ public class GetSellixCouponRepository : IGetSellixCouponRepository
                     ["discord_id"] = restModel.Model.DiscordId
                 };
 
-                HttpResponseMessage resp = await client.PostAsJsonAsync($"/gateway/API/Sellix/Command/CreateCoupon", payload);
+                HttpResponseMessage resp = await client.PostAsJsonAsync($"/API/Sellix/Command/CreateCoupon", payload);
 
                 var responseBody = await resp.Content.ReadAsStringAsync();
 
@@ -76,18 +79,22 @@ public class GetSellixCouponRepository : IGetSellixCouponRepository
 
             try
             {
-                await command.RespondAsync(embed: embedBuilder.Build());
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = null;
+                    x.Embed = embedBuilder.Build();
+                });
             }
             catch (Exception ex)
             {
                 try
                 {
-                    DiscordSocketClient discordClient =
-                        _discordConnectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+                    var discordClient =
+                           await _ConnectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
-                    var clientUser = await discordClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
+                    var clientUser = await discordClient.socketClient.GetUserAsync(Convert.ToUInt64(restModel.Model.DiscordId));
 
-                    var privateChannel = await discordClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
+                    var privateChannel = await discordClient.socketClient.GetChannelAsync(Convert.ToUInt64(restModel.Model.Channel)); //Exec channel
                     var textNotifier = privateChannel as IMessageChannel;
                     await textNotifier!.SendMessageAsync($"{clientUser.Mention}\n*Discord API 3S Respond TD Expired\n[Reverting To Channel Message]*", false, embedBuilder.Build());
                 }

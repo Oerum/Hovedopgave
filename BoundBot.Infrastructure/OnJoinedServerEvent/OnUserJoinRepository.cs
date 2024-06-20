@@ -13,7 +13,7 @@ public class OnUserJoinRepository : IOnUserJoinRepository
     private readonly ILogger<OnUserJoinRepository> _logger;
     private readonly IConfiguration _configuration;
     private readonly IDiscordConnectionHandler _discordConnectionHandler;
-    
+
     public OnUserJoinRepository(ILogger<OnUserJoinRepository> logger, IConfiguration configuration, IDiscordConnectionHandler discordConnectionHandler)
     {
         _logger = logger;
@@ -33,7 +33,6 @@ public class OnUserJoinRepository : IOnUserJoinRepository
             ulong[] infoChannelIds =
             {
                 1146535538971656264, // AboutUs
-                860630313528066048,  // Products
                 912356133937758300,  // FAQ
                 1095673161862893608  // Purchase
             };

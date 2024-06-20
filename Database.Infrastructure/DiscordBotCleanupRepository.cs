@@ -1,4 +1,4 @@
-﻿using Auth.Database;
+﻿using Auth.Database.Contexts;
 using BoundBot.Connection.DiscordConnectionHandler;
 using BoundBot.Connection.DiscordConnectionHandler.DiscordClientLibrary;
 using Crosscutting.TransactionHandling;
@@ -32,7 +32,7 @@ public class DiscordBotCleanupRepository : IDiscordBotCleanupRepository
     {
         try
         {
-            DiscordSocketClient client = _connectionHandler.GetDiscordSocketClient(_configuration["Discord:Token"] ?? string.Empty);
+            var client = await _connectionHandler.GetDiscordSocketRestClient(_configuration["Discord:Token"] ?? string.Empty);
 
 
             var expiredLicenses = await _db.ActiveLicenses
@@ -50,7 +50,7 @@ public class DiscordBotCleanupRepository : IDiscordBotCleanupRepository
 
             try
             {
-                var guild = client.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
+                var guild = client.socketClient.GetGuild(ulong.Parse(_configuration["Discord:Guid"]!));
                 var guildMembers = await guild.GetUsersAsync().FlattenAsync();
 
 
@@ -60,20 +60,28 @@ public class DiscordBotCleanupRepository : IDiscordBotCleanupRepository
 
                     if (guild != null)
                     {
-                        var clientUser = await client.GetUserAsync(member.Id);
+                        var clientUser = await client.socketClient.GetUserAsync(member.Id);
                         guildUser = guild.GetUser(clientUser.Id);
                     }
 
                     if (guildUser != null && (expiredLicenses.Exists(x => x.User.DiscordId == member.Id.ToString())
                         || !allActiveLicenses.Exists(user => user.User.DiscordId == member.Id.ToString())))
                     {
+
+                        _ = ulong.TryParse(_configuration["Discord:Role:Admin"], out ulong adminRoleId);
+                        _ = ulong.TryParse(_configuration["Discord:Role:Staff"], out ulong staffRoleId);
+                        _ = ulong.TryParse(_configuration["Discord:Role:Booster"], out ulong ServerBoosterRoleId);
+                        _ = ulong.TryParse(_configuration["Discord:Role:CommunityHero"], out ulong communityHeroRoleId);
+
                         var rolesNotToRemove = new HashSet<ulong>
                         {
                             860603152280584222, //Everyone
-                            860603777790771211, //Mod
-                            860628656259203092, //Staff
-                            860907247017394190 //Server Booster
+                            adminRoleId,
+                            staffRoleId,
+                            ServerBoosterRoleId,
+                            communityHeroRoleId,
                         };
+
                         var roles = guildUser.RoleIds.Where(id => !rolesNotToRemove.Contains(id)).ToList();
 
                         try
