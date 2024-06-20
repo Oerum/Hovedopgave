@@ -132,10 +132,10 @@ namespace BoundBot.Services
 
                 embedBuiler.WithTitle("Purchase Information");
 
-                embedBuiler.AddField("Requirement", "`A# Core Sub`", true);
+                embedBuiler.AddField("Requirement", "`A Core Sub`", true);
                 embedBuiler.AddField("Discord ID", $"`{restModel.Model.DiscordId}`", true);
                 embedBuiler.AddField("Discord Name", $"`{restModel.Model.DiscordUsername}`", true);
-                //embedBuiler.AddField("HWID", "`Found In A# Console`", true);
+                //embedBuiler.AddField("HWID", "`Found In A Console`", true);
                 embedBuiler.AddField("Server Booster", "`/coupon` for 10%", true);
                 embedBuiler.AddField("Language Support", "`All Languages Supported (Beta)`", true);
                 embedBuiler.AddField("Activation Time", "`Instant`", true);

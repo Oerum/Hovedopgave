@@ -56,6 +56,7 @@ namespace Sellix.Infrastructure
                             whichSpec = product.Title switch
                             {
                                 "AIO" => WhichSpec.AIO,
+                                "Season of Discovery" => WhichSpec.Placeholders,
                                 _ => WhichSpec.none
                             };
 
@@ -87,7 +88,7 @@ namespace Sellix.Infrastructure
                         {
                             whichSpec = product.Title switch
                             {
-                                "Placeholder" => WhichSpec.Placeholder,
+                                "placeholder" => WhichSpec.Placeholders,
                                 _ => 0
                             };
 

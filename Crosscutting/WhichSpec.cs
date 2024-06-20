@@ -3,8 +3,8 @@
     public enum WhichSpec
     {
         none,
+        //AIO
         AIO = 39,
-        Placeholder = 40,
-        
+        Placeholders = 40,
     }
 }

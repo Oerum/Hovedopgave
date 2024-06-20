@@ -54,11 +54,19 @@ namespace Auth.Infrastructure
                         if (productName.Contains("aio", StringComparison.CurrentCultureIgnoreCase)
                             || productNameEnum == WhichSpec.AIO
                             || productName == "staff"
-                            || productName == "staff"
-                            || (Enum.GetName(typeof(WhichSpec), model.AuthRequest)!.Contains("placeholder", StringComparison.CurrentCultureIgnoreCase)
-                                && (productName.Contains("placeholder")
-                                || productNameEnum == WhichSpec.Placeholder))
-                            || (model.AuthRequest == WhichSpec.Placeholder && (productName == "Placeholder" || productNameEnum == WhichSpec.Placeholder)))
+                            || productName == "sTaff"
+                            || (Enum.GetName(typeof(WhichSpec), model.AuthRequest)!.Contains("seasonofdiscovery", StringComparison.CurrentCultureIgnoreCase)
+                                && (productName.Contains("season of discovery")
+                                || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders))
+                            || (model.AuthRequest == WhichSpec.Placeholders && (productName == "[30 days]" || productNameEnum == WhichSpec.Placeholders)))
                         {
                             authList.Add(new AuthModelDTO
                             {

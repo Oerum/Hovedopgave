@@ -163,7 +163,7 @@ namespace DiscordBot.Infrastructure
                                 var roleId = item.ProductNameEnum switch
                                 {
                                     WhichSpec.AIO => aioResult,
-                                    WhichSpec.Placeholder => sodResult,
+                                    WhichSpec.Placeholders => sodResult,
                                     _ => monthResult
                                 };
 

@@ -65,7 +65,7 @@ public class DiscordBotNotificationRepository : IDiscordBotNotificationRepositor
                                 roleId = spec switch
                                 {
                                     WhichSpec.AIO => aioResult,
-                                    WhichSpec.Placeholder => sodResult,
+                                    WhichSpec.Placeholders => sodResult,
                                     _ => monthResult
                                 };
 

@@ -53,7 +53,7 @@ namespace BoundBot.Services
             guildCommand = new();
             guildCommand.WithName("hwid");
             guildCommand.WithDescription("Update your hwid for active license(s)");
-            guildCommand.AddOption("hwid", ApplicationCommandOptionType.String, "hwid from your A# console", true);
+            guildCommand.AddOption("hwid", ApplicationCommandOptionType.String, "hwid from your A console", true);
             commands.Add(guildCommand.Build());
 
             guildCommand = new();
@@ -76,7 +76,7 @@ namespace BoundBot.Services
             guildCommand = new();
             guildCommand.WithName("stafflicense");
             guildCommand.WithDescription("Grant yourself a staff license");
-            guildCommand.AddOption("hwid", ApplicationCommandOptionType.String, "hwid from your A# console", true);
+            guildCommand.AddOption("hwid", ApplicationCommandOptionType.String, "hwid from your A console", true);
             commands.Add(guildCommand.Build());
 
             guildCommand = new();

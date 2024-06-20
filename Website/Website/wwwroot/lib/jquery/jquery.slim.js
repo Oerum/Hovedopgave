@@ -1294,7 +1294,7 @@ function setDocument( node ) {
 		// Support: iOS 8 only
 		// https://bugs.webkit.org/show_bug.cgi?id=136851
 		// In-page `selector#id sibling-combinator selector` fails
-		if ( !el.querySelectorAll( "a#" + expando + "+*" ).length ) {
+		if ( !el.querySelectorAll( "A" + expando + "+*" ).length ) {
 			rbuggyQSA.push( ".#.+[+~]" );
 		}
 
@@ -6049,13 +6049,13 @@ jQuery.extend( {
 					}
 
 					// Support: Chrome <=35 - 45+
-					// Assign undefined instead of using delete, see Data#remove
+					// Assign undefined instead of using delete, see DatAremove
 					elem[ dataPriv.expando ] = undefined;
 				}
 				if ( elem[ dataUser.expando ] ) {
 
 					// Support: Chrome <=35 - 45+
-					// Assign undefined instead of using delete, see Data#remove
+					// Assign undefined instead of using delete, see DatAremove
 					elem[ dataUser.expando ] = undefined;
 				}
 			}
